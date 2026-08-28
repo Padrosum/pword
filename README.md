@@ -157,3 +157,6 @@ göre) daha sonraki sürümleri koşulları altında dağıtılır ve değiştir
 Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 Paketlenen tüm bağımlılıklar AGPL-3.0 ile uyumludur (MIT, BSD, Apache-2.0).
+Gömülü yazı tipleri (Inter, Literata, Lora, Playfair Display, Open Sans,
+JetBrains Mono) **SIL Open Font License 1.1** altındadır ve harici bir
+CDN'den değil, uygulamanın kendisinden servis edilir.

@@ -129,7 +129,9 @@ export async function exportDocx(doc: PadDocument): Promise<Blob> {
           const size = sizeToHalfPoints(mark.attrs?.fontSize)
           if (size) options.size = size
           if (typeof mark.attrs?.fontFamily === 'string' && mark.attrs.fontFamily) {
-            options.font = mark.attrs.fontFamily.split(',')[0]!.replace(/['"]/g, '').trim() || undefined
+            // Word knows e.g. "Literata", not the bundled "Literata Variable".
+            const family = mark.attrs.fontFamily.split(',')[0]!.replace(/['"]/g, '').trim()
+            options.font = family ? family.replace(/ Variable$/, '') : undefined
           }
           break
         }

@@ -63,8 +63,13 @@ export function currentParagraphStyle(editor: Editor): ParagraphStyle {
 
 export const FONT_FAMILIES: { id: string; label: string; css: string }[] = [
   { id: 'serif', label: 'Serif', css: "'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif" },
+  { id: 'literata', label: 'Literata', css: "'Literata Variable', Charter, Georgia, serif" },
+  { id: 'lora', label: 'Lora', css: "'Lora Variable', Georgia, serif" },
+  { id: 'playfair', label: 'Playfair Display', css: "'Playfair Display Variable', Georgia, serif" },
   { id: 'sans', label: 'Sans', css: "'Inter Variable', ui-sans-serif, system-ui, sans-serif" },
+  { id: 'open-sans', label: 'Open Sans', css: "'Open Sans Variable', ui-sans-serif, system-ui, sans-serif" },
   { id: 'mono', label: 'Mono', css: "ui-monospace, 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace" },
+  { id: 'jetbrains', label: 'JetBrains Mono', css: "'JetBrains Mono Variable', ui-monospace, Menlo, Consolas, monospace" },
 ]
 
 export function fontIdToCss(id: string): string {

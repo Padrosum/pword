@@ -1,4 +1,9 @@
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/literata';
+@import '@fontsource-variable/lora';
+@import '@fontsource-variable/playfair-display';
+@import '@fontsource-variable/open-sans';
+@import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
