@@ -13,7 +13,7 @@
 mahrem bir belge editörüdür. Tarayıcıda çalışır; hesap yok, bulut yok, takip yok.
 Yazdığınız her şey yalnızca **sizin cihazınızda** saklanır.
 
-[**Pword'ü Aç**](https://padrosum.github.io/pword/) ·
+[**Pword'ü Aç**](https://pword.alihankarakus.com) ·
 [Nedir?](#nedir) ·
 [Özellikler](#özellikler) ·
 [Mimari](#mimari)
