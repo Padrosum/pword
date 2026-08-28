@@ -438,6 +438,22 @@ select optgroup {
 
 /* ---------- Utilities ---------- */
 
+.type-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  background: var(--app-accent);
+  vertical-align: text-bottom;
+  animation: caret-blink 1.06s step-end infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
 }

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { BookOpen, Copy, FileUp, Image, MoreVertical, Music, Plus, Trash2 } from 'lucide-react'
 import { BrandMark } from './BrandMark'
+import { Typewriter } from './Typewriter'
 import { ThemeToggle } from './ThemeToggle'
 import { Dialog } from './ui/Dialog'
 import { IconButton } from './ui/IconButton'
@@ -51,7 +52,11 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-14">
         <section aria-labelledby="start-writing">
-          <h1 id="start-writing" className="text-2xl font-bold tracking-tight text-ink">
+          <p className="font-mono text-sm font-medium text-accent">
+            <Typewriter text="Pword" />
+            <span className="sr-only">Pword — </span>
+          </p>
+          <h1 id="start-writing" className="mt-1 text-2xl font-bold tracking-tight text-ink">
             Simple documents. Private by design.
           </h1>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
