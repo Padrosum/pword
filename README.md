@@ -1,173 +1,159 @@
+<div align="center">
+
+<img src="public/icon.svg" width="72" alt="Pword logosu" />
+
 # Pword
 
-**Simple documents. Private by design.**
+### Dökümanınız cihazınızı terk etmesin.
 
 [![CI](https://github.com/Padrosum/pword/actions/workflows/ci.yml/badge.svg)](https://github.com/Padrosum/pword/actions/workflows/ci.yml)
+[![Lisans](https://img.shields.io/badge/lisans-AGPL--3.0-blue.svg)](LICENSE)
 
-Pword is a minimalist, local-first document editor for students, writers,
-researchers, and anyone who needs to write without ceremony. It runs entirely
-in your browser — there is no server, no account, and no upload. Your
-documents live on your device and stay there.
+**Pword**, öğrenciler, yazarlar ve araştırmacılar için tasarlanmış sade ve
+mahrem bir belge editörüdür. Tarayıcıda çalışır; hesap yok, bulut yok, takip yok.
+Yazdığınız her şey yalnızca **sizin cihazınızda** saklanır.
 
-Pword is part of the Padros family of tools (Pmusic, Pixora, Ptree), but it is
-an independent application with no shared backend.
+[**Pword'ü Aç**](https://padrosum.github.io/pword/) ·
+[Nedir?](#nedir) ·
+[Özellikler](#özellikler) ·
+[Mimari](#mimari)
 
----
-
-## Why Pword exists
-
-Writing tools have drifted toward the cloud. Most editors today ask you to
-sign in, sync your work to someone else's computer, and accept tracking in
-exchange for a text box.
-
-Pword takes the opposite position:
-
-- **Local-first** — documents are stored in your browser (IndexedDB), never
-  on a server.
-- **Private by design** — no analytics, no telemetry, no tracking, no
-  accounts, no cloud sync.
-- **Simple** — a focused writing surface, a compact toolbar, and the
-  formatting most documents actually need.
-- **Yours** — export to `.docx`, PDF (via print), or just keep working.
-  Closing the browser and coming back later loses nothing.
-
-The product intentionally avoids being a Microsoft Word clone. It is a calm,
-lightweight writing tool with its own identity.
+</div>
 
 ---
 
-## Features
+## Nedir?
 
-### Writing
+Pword, buluta ihtiyaç duymadan çalışan bir yazma aracıdır. Açarsınız, yazmaya
+başlarsınız; sekmeyi kapatır, ertesi gün geri dönersiniz ve kaldığınız yerden
+devam edersiniz. Microsoft Word'ün klonu olmaya çalışmaz — hızlı, sakin ve
+özgün bir yazma deneyimi sunar.
 
-- Rich text editing: **bold, italic, underline, strikethrough**
-- Text color and highlight
-- Font family (Serif / Sans / Mono) and font size
-- Paragraph styles: Title, Subtitle, Heading 1–3, Normal
-- Alignment: left, center, right, justify
-- Bullet lists, numbered lists, nested lists, checklists
-- Links, images, tables, horizontal rules, explicit page breaks
-- Undo/redo, keyboard shortcuts, clear formatting
-- Live word count, character count, and page estimate
+<div align="center">
+  <img src="docs/screenshots/home.png" width="820" alt="Pword ana ekranı — son belgeler ve yeni belge" />
+  <p><em>Ana ekran: son belgeler, tek tıkla yazmaya başlangıç.</em></p>
+</div>
 
-### Documents
+<div align="center">
+  <img src="docs/screenshots/editor.png" width="49%" alt="Pword editörü — A4 sayfa görünümü, açık tema" />
+  <img src="docs/screenshots/editor-dark.png" width="49%" alt="Pword editörü — koyu tema, kağıt görünümü korunur" />
+  <p><em>Editör: gerçek A4 sayfa görünümü · koyu temada bile kağıt gibi okunur.</em></p>
+</div>
 
-- Automatic saving (debounced — not on every keystroke) with a visible save
-  state: *Unsaved changes → Saving… → Saved locally*
-- Manual save with `Ctrl/Cmd + S`
-- Recent documents list, reopen where you left off
-- Rename, duplicate, delete — all locally
+<div align="center">
+  <img src="docs/screenshots/home-dark.png" width="820" alt="Pword ana ekranı — koyu tema" />
+</div>
 
-### Files
+## Özellikler
 
-- **Import `.docx`** — parsed entirely in the browser (headings, paragraphs,
-  bold/italic/underline, font size, basic font family, text color, lists,
-  tables, links, and embedded images where supported). Unsupported formatting
-  is reported, never silently destroyed, and no external service ever sees
-  your file. `.doc` (legacy binary) is not supported.
-- **Export `.docx`** — the editor's document structure is converted to a
-  Word-compatible file, client-side.
-- **PDF / print** — a dedicated print stylesheet produces a clean A4
-  document. Use your browser's "Save as PDF" — conversion happens on your
-  device.
+**Yazma**
 
-### Privacy & offline
+- Kalın, italik, altı çizili, üstü çizili; yazı rengi ve fosforlu kalem
+- Yazı tipi (Serif / Sans / Mono) ve punto seçimi
+- Paragraf stilleri: Başlık, Alt başlık, H1–H3, Normal
+- Hizalama: sola, ortala, sağa, iki yana
+- Madde ve numaralı listeler, iç içe listeler, yapılacaklar listesi
+- Bağlantı, görsel, tablo, yatay çizgi, sayfa sonu
+- Gerçek A4 sayfalama: sayfalar yüksekliğe göre dolar, Word gibi alt alta akar
+- Canlı kelime / karakter / sayfa sayısı
 
-- No account, no backend, no analytics, no remote document processing.
-- No third-party network requests after the first load; fonts are bundled.
-- Installable Progressive Web App: after the first visit (or installation),
-  Pword works fully offline. A service worker caches the app shell.
+**Belgeler**
 
-> Pword does not claim 100% Microsoft Word compatibility. It handles common
-> document structures predictably and tells you when something was skipped.
+- Otomatik kaydetme (aralık bırakınca) + `Ctrl/Cmd + S` ile manuel kayıt
+- Son belgeler listesi; geri döndüğünüzde kaldığınız belge açılır
+- Yeniden adlandırma, çoğaltma, silme — hepsi yerel
 
----
+**Dosyalar**
 
-## Architecture
+- **.docx içe aktarma** — tamamen tarayıcıda ayrıştırılır; desteklenmeyen
+  biçimler sessizce çöpe gitmez, size bildirilir
+- **.docx dışa aktarma** — belge yapısı Word uyumlu dosyaya dönüştürülür
+- **PDF / yazdırma** — temiz A4 çıktısı; dönüşüm cihazınızda olur
 
-Pword is a fully static site. It can be deployed to GitHub Pages, Cloudflare
-Pages, or any static host.
+**Gizlilik ve çevrimdışı**
 
-```
-React 19 + TypeScript + Vite
-Tailwind CSS v4 (design tokens, dark mode)
-TipTap / ProseMirror (editor + schema-based sanitization)
-IndexedDB (documents + settings, with schema versioning)
-vite-plugin-pwa / Workbox (service worker, offline cache)
-mammoth.js (DOCX → HTML import, lazy-loaded)
-docx (JSON → DOCX export, lazy-loaded)
-```
+- Hesap yok, arka uç yok, analitik yok, telemetri yok
+- İlk yüklemeden sonra tamamen çevrimdışı çalışır; kurulabilir PWA
+- Yazı tipleri dahil hiçbir dış kaynak yüklenmez
 
-### Project structure
+> Pword "%100 Word uyumlu" değildir ve bunu iddia etmez. Yaygın belge
+> yapılarını öngörülebilir şekilde işler; atladığı bir şey olursa söyler.
+
+## Belgeleriniz nerede saklanıyor?
+
+Cihazınızda. Belgeler tarayıcınızın IndexedDB veritabanında tutulur
+(`pword`), şema sürümlüdür ve ileride güvenle evrilebilir. Otomatik kayıt
+aralıklı çalışır; sekme gizlendiğinde veya kapatıldığında bekleyen kayıt
+flush edilir — yenileme veya çökme belgenizi kaybetmez.
+
+İçe aktarılan `.docx` dosyaları önce anlamsal HTML'e çevrilir, ardından
+ProseMirror şemasından geçirilir: script, olay dinleyici veya güvensiz
+`javascript:` bağlantısı belgenize asla sızmaz.
+
+## Mimari
+
+Pword tamamen statik bir sitedir — arka uç, API veya sunucu tarafı belge
+işleme yoktur.
+
+| Katman | Teknoloji |
+| --- | --- |
+| Arayüz | React 19 + TypeScript + Vite |
+| Stil | Tailwind CSS v4 (tasarım token'ları, koyu tema) |
+| Editör | TipTap / ProseMirror + gerçek A4 sayfalama |
+| Depolama | IndexedDB (şema sürümlü, `src/storage/`) |
+| PWA | vite-plugin-pwa / Workbox |
+| .docx | mammoth (içe) · docx (dışa) — tembel yüklenir |
 
 ```
 src/
-  app/         application shell (view state, bootstrap)
-  components/  UI: top bar, toolbar, status bar, home view, primitives
-  editor/      TipTap setup, custom nodes (page break, title), style presets
-  storage/     IndexedDB wrapper, document & settings repositories
-  import/      DOCX import pipeline
-  export/      DOCX export, print/PDF
-  pwa/         service worker registration
+  app/         uygulama kabuğu
+  components/  arayüz bileşenleri (üst çubuk, araç çubuğu, ana ekran…)
+  editor/      TipTap kurulumu, özel düğümler, sayfalama algoritması
+  storage/     IndexedDB sarmalayıcı ve depolar
+  import/      .docx içe aktarma
+  export/      .docx dışa aktarma, yazdırma
+  pwa/         service worker kaydı
   hooks/       useAutosave, useTheme
-  lib/         small utilities (debounce, ids, stats, toasts, download)
-  types/       shared document model types
-  styles/      design tokens, editor typography, print styles
-  test/        test setup and integration tests
+  lib/         küçük yardımcılar
+  types/       belge modeli tipleri
+  styles/      tasarım token'ları, editör tipografisi, baskı stilleri
 ```
 
-### How documents are stored
+## Geliştirme
 
-Documents are kept in an IndexedDB database (`pword`) with a versioned schema
-(migrations land in `src/storage/db.ts`):
-
-- `documents` — id, title, content (ProseMirror JSON), createdAt, updatedAt,
-  word/character counts, schema version
-- `settings` — theme preference and last opened document
-
-Autosave is debounced (900 ms) and also flushed when the tab is hidden or
-closed, so a refresh or crash does not lose your work.
-
-### Security model
-
-Everything is processed locally. Imported `.docx` files are converted to
-semantic HTML and then parsed through the ProseMirror schema, which drops
-anything the editor does not understand — scripts, event handlers, and
-unsafe link protocols never make it into your document. No remote scripts
-are loaded; no document data ever leaves the browser.
-
----
-
-## Development
-
-Requires Node.js 20+.
+Node.js 20+ gerekir.
 
 ```bash
 npm install
-npm run dev        # start the dev server
-npm run test       # run the test suite (vitest)
+npm run dev        # geliştirme sunucusu
+npm test           # test paketi (vitest)
 npm run lint       # oxlint
-npm run build      # type-check + production build (dist/)
-npm run preview    # serve the production build
+npm run build      # tip kontrolü + üretim derlemesi (dist/)
+npm run preview    # üretim derlemesini sunar
 ```
 
-### Deployment
+CI: her push ve PR için lint + test + build çalışır (`.github/workflows/ci.yml`).
+`main`'e her push GitHub Pages'e otomatik dağıtılır (`.github/workflows/deploy.yml`).
 
-`npm run build` produces a self-contained `dist/` folder. Upload it to any
-static host. No environment variables, no server configuration.
+## Padros ailesi
 
-For GitHub Pages, deploy the `dist/` directory (e.g. with an Actions
-workflow). For sub-directory hosting, set `base` in `vite.config.ts`.
+Pword, Padros ekosisteminin bir üyesidir — teknik bir bağlantı yoktur, yalnızca
+ortak bir felsefe ve tasarım dili vardır.
 
----
+<div align="center">
 
-## License
+[![Pmusic](https://img.shields.io/badge/Pmusic-6D28D9?style=for-the-badge)](https://pmusic.alihankarakus.com)
+[![Pixora](https://img.shields.io/badge/Pixora-7C3AED?style=for-the-badge)](https://pixora.alihankarakus.com)
+[![Ptree](https://img.shields.io/badge/Ptree-8B5CF6?style=for-the-badge)](https://alihankarakus.com)
+
+</div>
+
+## Lisans
 
 Copyright © 2026 Padros
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the **GNU Affero General Public License** as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version. See [LICENSE](LICENSE).
+Bu program **GNU Affero Genel Kamu Lisansı** (AGPL-3.0) sürüm 3 veya (isteğinize
+göre) daha sonraki sürümleri koşulları altında dağıtılır ve değiştirilebilir.
+Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
-All bundled dependencies are AGPL-3.0-compatible (MIT, BSD, or Apache-2.0).
+Paketlenen tüm bağımlılıklar AGPL-3.0 ile uyumludur (MIT, BSD, Apache-2.0).
