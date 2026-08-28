@@ -2,6 +2,8 @@
 
 **Simple documents. Private by design.**
 
+[![CI](https://github.com/Padrosum/pword/actions/workflows/ci.yml/badge.svg)](https://github.com/Padrosum/pword/actions/workflows/ci.yml)
+
 Pword is a minimalist, local-first document editor for students, writers,
 researchers, and anyone who needs to write without ceremony. It runs entirely
 in your browser — there is no server, no account, and no upload. Your
