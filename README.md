@@ -85,8 +85,9 @@ and original writing experience.
 
 On your device. Documents are kept in your browser's IndexedDB database
 (`pword`), which is schema-versioned and can safely evolve over time.
-Autosave runs on an interval; when the tab is hidden or closed, any pending
-save is flushed — a refresh or crash won't lose your document.
+Autosave runs after a short pause; when the tab is hidden or closed, any pending
+save is flushed. Normal navigation and refresh preserve pending changes, but a
+browser or device crash can still interrupt a write before it reaches storage.
 
 Imported `.docx` files are first converted to semantic HTML, then passed
 through the ProseMirror schema: scripts, event listeners, or unsafe

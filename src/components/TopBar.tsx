@@ -40,8 +40,8 @@ export function TopBar({ title, onTitleChange, saveState, onBack, menu }: TopBar
 
         <span
           className={cn(
-            'hidden text-xs sm:inline',
-            saveState === 'error' ? 'text-danger' : 'text-muted',
+            'text-xs',
+            saveState === 'error' ? 'inline text-danger' : 'hidden text-muted sm:inline',
           )}
           role="status"
         >

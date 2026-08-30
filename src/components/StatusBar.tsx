@@ -23,7 +23,9 @@ export function StatusBar({ words, characters, pages, saveState }: StatusBarProp
         </p>
         <p className="flex items-center gap-3">
           <span
-            className={cn('hidden sm:inline', saveState === 'error' && 'text-danger')}
+            className={cn(
+              saveState === 'error' ? 'inline text-danger' : 'hidden sm:inline',
+            )}
             role="status"
             aria-live="polite"
           >

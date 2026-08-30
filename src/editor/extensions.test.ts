@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { Editor } from '@tiptap/core'
 import { buildExtensions } from './extensions'
+import type { JSONContent } from '@tiptap/core'
 
-function makeEditor(html: string): Editor {
-  const editor = new Editor({ extensions: buildExtensions(), content: html })
+function makeEditor(content: string | JSONContent): Editor {
+  const editor = new Editor({ extensions: buildExtensions(), content })
   return editor
 }
 
@@ -36,6 +37,26 @@ describe('editor schema sanitization', () => {
     const paragraph = json.content?.find((n) => n.type === 'paragraph')
     expect(JSON.stringify(paragraph)).toContain('click')
     expect(JSON.stringify(paragraph)).toContain('https://example.com')
+    editor.destroy()
+  })
+
+  it('blocks remote images while keeping local data images', () => {
+    const editor = makeEditor(
+      '<p>before</p><img src="https://example.com/tracker.png"><img src="data:image/png;base64,AAAA">',
+    )
+    const json = editor.getJSON()
+    expect(json.content?.some((n) => n.type === 'image' && n.attrs?.src?.startsWith('https://'))).toBe(false)
+    expect(json.content?.some((n) => n.type === 'image' && n.attrs?.src?.startsWith('data:image/png'))).toBe(true)
+    editor.destroy()
+  })
+
+  it('renders a blocked placeholder for remote images in stored content', () => {
+    const editor = makeEditor({
+      type: 'doc',
+      content: [{ type: 'image', attrs: { src: 'https://example.com/remote.png', alt: 'remote' } }],
+    })
+    expect(editor.view.dom.querySelector('img')).toBeNull()
+    expect(editor.view.dom.querySelector('[data-blocked-image]')).toBeTruthy()
     editor.destroy()
   })
 

@@ -11,6 +11,8 @@ export interface PadDocument {
   wordCount: number
   charCount: number
   schemaVersion: 1
+  /** Monoton persistence revision; absent only in pre-revision records. */
+  revision?: number
 }
 
 export type SaveState = 'saved' | 'saving' | 'unsaved' | 'error'

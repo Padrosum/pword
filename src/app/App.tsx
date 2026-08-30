@@ -81,7 +81,7 @@ export default function App() {
   const createAndOpen = useCallback(async () => {
     try {
       const doc = createDocument()
-      await docsRepository.save(doc)
+      await docsRepository.insert(doc)
       setDocs((prev) => (prev ? [doc, ...prev] : prev))
       openDocument(doc)
     } catch (error) {
@@ -94,7 +94,7 @@ export default function App() {
     async (doc: PadDocument) => {
       try {
         const copy = createDocument(`${doc.title || 'Untitled document'} (copy)`, doc.content)
-        await docsRepository.save(copy)
+        await docsRepository.insert(copy)
         setDocs((prev) => (prev ? [copy, ...prev] : prev))
         openDocument(copy)
       } catch (error) {
@@ -125,7 +125,7 @@ export default function App() {
       try {
         const result = await importDocx(file)
         const imported = createDocument(result.title, result.content)
-        await docsRepository.save(imported)
+        await docsRepository.insert(imported)
         setDocs((prev) => (prev ? [imported, ...prev] : prev))
         openDocument(imported)
         if (result.warnings > 0) {
@@ -164,6 +164,7 @@ export default function App() {
           repository={docsRepository}
           onBack={goHome}
           onOpenDoc={openDocument}
+          onCreateDocument={createAndOpen}
         />
       ) : (
         <HomeView

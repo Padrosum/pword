@@ -14,6 +14,7 @@ import TextStyle from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
 import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
+import { mergeAttributes } from '@tiptap/core'
 import { DocSubtitle, DocTitle } from './doc-title'
 import { FontSize } from './font-size'
 import { PageBreak } from './page-break'
@@ -21,6 +22,30 @@ import { PageBreak } from './page-break'
 export function buildExtensions(): ReturnType<typeof collect> {
   return collect()
 }
+
+function isSafeImageSource(src: unknown): src is string {
+  return typeof src === 'string' && /^data:image\/(png|jpeg|gif|webp);base64,/i.test(src)
+}
+
+const SafeImage = Image.extend({
+  parseHTML() {
+    return [{
+      tag: 'img[src]',
+      getAttrs: (element) => (isSafeImageSource(element.getAttribute('src')) ? {} : false),
+    }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    if (!isSafeImageSource(HTMLAttributes.src)) {
+      return [
+        'span',
+        { role: 'img', 'aria-label': 'Remote image blocked', 'data-blocked-image': '' },
+        '[remote image blocked]',
+      ]
+    }
+    return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]
+  },
+})
 
 function collect() {
   return [
@@ -57,7 +82,7 @@ function collect() {
           ]
         },
       }),
-    Image.configure({
+    SafeImage.configure({
       inline: false,
       allowBase64: true,
     }),

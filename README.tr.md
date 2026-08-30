@@ -85,8 +85,10 @@ devam edersiniz. Microsoft Word'ün klonu olmaya çalışmaz — hızlı, sakin 
 
 Cihazınızda. Belgeler tarayıcınızın IndexedDB veritabanında tutulur
 (`pword`), şema sürümlüdür ve ileride güvenle evrilebilir. Otomatik kayıt
-aralıklı çalışır; sekme gizlendiğinde veya kapatıldığında bekleyen kayıt
-flush edilir — yenileme veya çökme belgenizi kaybetmez.
+kısa bir duraklamadan sonra çalışır; sekme gizlendiğinde veya kapatıldığında
+bekleyen kayıt flush edilir. Normal gezinme ve yenileme bekleyen değişiklikleri
+korur; ancak tarayıcı veya cihaz çökmesi, kayıt depolamaya ulaşmadan önce işlemi
+kesebilir.
 
 İçe aktarılan `.docx` dosyaları önce anlamsal HTML'e çevrilir, ardından
 ProseMirror şemasından geçirilir: script, olay dinleyici veya güvensiz

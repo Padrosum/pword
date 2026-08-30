@@ -35,6 +35,22 @@ describe('App', () => {
     })
   })
 
+  it('persists a blank document created from the editor menu', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: /start writing/i }))
+    await waitFor(() => screen.getByRole('toolbar', { name: /formatting/i }))
+    await user.click(screen.getByRole('button', { name: /document menu/i }))
+    await user.click(await screen.findByRole('menuitem', { name: /new document/i }))
+    await waitFor(() => screen.getByRole('toolbar', { name: /formatting/i }))
+    await user.click(screen.getByRole('button', { name: /back to documents/i }))
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open untitled document/i })).toHaveLength(2)
+    })
+  })
+
   it('opens a document from the home list', async () => {
     const user = userEvent.setup()
     render(<App />)

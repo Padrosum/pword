@@ -130,6 +130,34 @@ export class Database {
     await transactionDone(tx)
   }
 
+  /** Read, transform, and write a record in one transaction. */
+  async update<T>(
+    store: string,
+    key: IDBValidKey,
+    transform: (current: T | undefined) => T,
+  ): Promise<T> {
+    const db = await this.db()
+    const tx = db.transaction(store, 'readwrite')
+    const objectStore = tx.objectStore(store)
+    let updated: T
+    const request = objectStore.get(key)
+
+    await new Promise<void>((resolve, reject) => {
+      request.onsuccess = () => {
+        try {
+          updated = transform(request.result as T | undefined)
+          objectStore.put(updated)
+          resolve()
+        } catch (error) {
+          reject(error)
+        }
+      }
+      request.onerror = () => reject(new StorageError('IndexedDB request failed', request.error))
+    })
+    await transactionDone(tx)
+    return updated!
+  }
+
   async delete(store: string, key: IDBValidKey): Promise<void> {
     const db = await this.db()
     const tx = db.transaction(store, 'readwrite')

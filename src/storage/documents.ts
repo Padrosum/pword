@@ -27,6 +27,14 @@ export function createDocument(
     wordCount: countWords(text),
     charCount: countCharacters(text),
     schemaVersion: 1,
+    revision: 0,
+  }
+}
+
+export class RevisionConflictError extends Error {
+  constructor(message = 'The document was changed in another tab') {
+    super(message)
+    this.name = 'RevisionConflictError'
   }
 }
 
@@ -46,8 +54,26 @@ export class DocumentRepository {
     return this.db.get<PadDocument>(STORE, id)
   }
 
+  /**
+   * Legacy insert/update operation used only for initial writes and tests.
+   * Editor updates must use update() so stale tabs cannot overwrite content.
+   */
   async save(doc: PadDocument): Promise<void> {
     await this.db.put(STORE, doc)
+  }
+
+  async insert(doc: PadDocument): Promise<void> {
+    await this.db.put(STORE, doc)
+  }
+
+  async update(doc: PadDocument, expectedRevision: number): Promise<PadDocument> {
+    return this.db.update<PadDocument>(STORE, doc.id, (current) => {
+      const currentRevision = current?.revision ?? 0
+      if (!current || currentRevision !== expectedRevision) {
+        throw new RevisionConflictError()
+      }
+      return { ...doc, revision: currentRevision + 1 }
+    })
   }
 
   async remove(id: string): Promise<void> {

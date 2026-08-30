@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { debounce } from '../lib/debounce'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PadDocument, SaveState } from '../types/document'
 
 /**
- * Debounced autosave for a document.
+ * Debounced, serialized autosave for a document.
  *
- * - `schedule` marks the document dirty and schedules a write (900 ms).
- * - `flush` writes immediately (used by manual save and page hide).
- * - A pending write is flushed when the tab is hidden or closed so the
- *   document survives refreshes and navigation.
+ * The latest snapshot is retained until persistence succeeds. This makes a
+ * failed save retryable and prevents an unmount from racing a destructive
+ * operation such as document deletion.
  */
 export function useAutosave(
   persist: (doc: PadDocument) => Promise<void>,
@@ -16,57 +14,117 @@ export function useAutosave(
 ): {
   state: SaveState
   schedule: (doc: PadDocument) => void
-  flush: () => void
+  flush: () => Promise<boolean>
+  pauseAndDiscard: () => Promise<void>
+  resume: () => void
 } {
   const [state, setState] = useState<SaveState>('saved')
   const persistRef = useRef(persist)
+  const pendingRef = useRef<PadDocument | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const runningRef = useRef<Promise<void> | null>(null)
+  const aliveRef = useRef(true)
+  const flushOnCleanupRef = useRef(true)
+
   useEffect(() => {
     persistRef.current = persist
-  })
+  }, [persist])
 
-  const debouncedWrite = useMemo(
-    () =>
-      debounce(async (doc: PadDocument) => {
-        setState('saving')
+  const setStateIfAlive = useCallback((next: SaveState) => {
+    if (aliveRef.current) setState(next)
+  }, [])
+
+  const drain = useCallback(async function drainWork(): Promise<void> {
+    if (runningRef.current) {
+      await runningRef.current
+      if (pendingRef.current) await drainWork()
+      return
+    }
+
+    const work = (async () => {
+      while (pendingRef.current) {
+        const doc = pendingRef.current
+        pendingRef.current = null
+        setStateIfAlive('saving')
         try {
           await persistRef.current(doc)
-          setState('saved')
+          setStateIfAlive(pendingRef.current ? 'unsaved' : 'saved')
         } catch (error) {
+          // Keep the failed snapshot so a later edit or explicit flush can retry it.
+          pendingRef.current = pendingRef.current ?? doc
           console.error('[pword] autosave failed', error)
-          setState('error')
+          setStateIfAlive('error')
+          break
         }
-      }, waitMs),
-    [waitMs],
-  )
+      }
+    })()
+
+    runningRef.current = work
+    try {
+      await work
+    } finally {
+      runningRef.current = null
+    }
+  }, [setStateIfAlive])
 
   const schedule = useCallback(
     (doc: PadDocument) => {
-      setState('unsaved')
-      debouncedWrite(doc)
+      pendingRef.current = doc
+      setStateIfAlive('unsaved')
+      if (timerRef.current !== null) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null
+        void drain()
+      }, waitMs)
     },
-    [debouncedWrite],
+    [drain, setStateIfAlive, waitMs],
   )
 
-  const flush = useCallback(() => {
-    debouncedWrite.flush()
-  }, [debouncedWrite])
+  const flush = useCallback((): Promise<boolean> => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    const finished = drain()
+    return finished.then(() => pendingRef.current === null && runningRef.current === null)
+  }, [drain])
+
+  // Stop scheduling new writes, wait for an already-running write, and discard
+  // the pending snapshot. Used immediately before a document is deleted.
+  const pauseAndDiscard = useCallback(async (): Promise<void> => {
+    flushOnCleanupRef.current = false
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    pendingRef.current = null
+    if (runningRef.current) await runningRef.current
+    pendingRef.current = null
+  }, [])
+
+  const resume = useCallback(() => {
+    flushOnCleanupRef.current = true
+  }, [])
 
   useEffect(() => {
     const flushNow = () => {
-      // Flush only if there are pending changes; flush() is a no-op otherwise.
-      debouncedWrite.flush()
+      void flush()
     }
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') flushNow()
     }
+
     window.addEventListener('pagehide', flushNow)
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       window.removeEventListener('pagehide', flushNow)
       document.removeEventListener('visibilitychange', onVisibility)
-      flushNow()
+      aliveRef.current = false
+      if (timerRef.current !== null) clearTimeout(timerRef.current)
+      timerRef.current = null
+      if (flushOnCleanupRef.current) void drain()
     }
-  }, [debouncedWrite])
+  }, [drain, flush])
 
-  return { state, schedule, flush }
+  return { state, schedule, flush, pauseAndDiscard, resume }
 }

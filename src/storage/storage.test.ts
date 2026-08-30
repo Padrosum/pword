@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { IDBFactory } from 'fake-indexeddb'
 import { Database, isQuotaError } from './db'
-import { createDocument, DocumentRepository, jsonToPlainText } from './documents'
+import {
+  createDocument,
+  DocumentRepository,
+  jsonToPlainText,
+  RevisionConflictError,
+} from './documents'
 import { SettingsRepository } from './settings'
 import { DEFAULT_SETTINGS } from '../types/document'
 import type { PadDocument } from '../types/document'
@@ -53,6 +58,32 @@ describe('DocumentRepository', () => {
     expect(reloaded?.title).toBe('Essay v2')
 
     await repository.remove(doc.id)
+    expect(await repository.get(doc.id)).toBeUndefined()
+  })
+
+  it('rejects stale concurrent updates without overwriting newer content', async () => {
+    const doc = createDocument('Original')
+    await repository.insert(doc)
+
+    const first = repository.update({ ...doc, title: 'First' }, 0)
+    const second = repository.update({ ...doc, title: 'Second' }, 0)
+    const results = await Promise.allSettled([first, second])
+
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1)
+    expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1)
+    const rejected = results.find((result) => result.status === 'rejected')
+    expect(rejected?.status === 'rejected' && rejected.reason).toBeInstanceOf(RevisionConflictError)
+    const saved = await repository.get(doc.id)
+    expect(['First', 'Second']).toContain(saved?.title)
+    expect(saved?.revision).toBe(1)
+  })
+
+  it('does not recreate a document deleted before a stale update', async () => {
+    const doc = createDocument('To delete')
+    await repository.insert(doc)
+    await repository.remove(doc.id)
+
+    await expect(repository.update({ ...doc, title: 'Stale' }, 0)).rejects.toBeInstanceOf(RevisionConflictError)
     expect(await repository.get(doc.id)).toBeUndefined()
   })
 

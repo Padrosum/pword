@@ -19,7 +19,11 @@ import { useAutosave } from '../hooks/useAutosave'
 import { countCharacters, countWords } from '../lib/textStats'
 import { downloadBlob, sanitizeFilename } from '../lib/download'
 import { toast } from '../lib/toast'
-import { jsonToPlainText, createDocument } from '../storage/documents'
+import {
+  jsonToPlainText,
+  createDocument,
+  RevisionConflictError,
+} from '../storage/documents'
 import { exportDocx } from '../export/docx'
 import { printDocument } from '../export/print'
 import { importDocx } from '../import/docx'
@@ -31,9 +35,10 @@ interface EditorViewProps {
   repository: DocumentRepository
   onBack: () => void
   onOpenDoc: (doc: PadDocument) => void
+  onCreateDocument: () => Promise<void>
 }
 
-export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewProps) {
+export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocument }: EditorViewProps) {
   const [title, setTitle] = useState(doc.title)
   const [stats, setStats] = useState({ words: doc.wordCount, chars: doc.charCount, pages: 1 })
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -42,6 +47,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewPro
   // Latest document snapshot, used by autosave and exports without re-rendering.
   const latestDocRef = useRef<PadDocument>(doc)
   const titleRef = useRef(title)
+  const revisionRef = useRef(doc.revision ?? 0)
 
   useEffect(() => {
     titleRef.current = title
@@ -56,10 +62,21 @@ export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewPro
     }
   }, [title])
 
-  const { state: saveState, schedule, flush } = useAutosave(
+  const { state: saveState, schedule, flush, pauseAndDiscard, resume } = useAutosave(
     useCallback(
       async (updated: PadDocument) => {
-        await repository.save(updated)
+        try {
+          const saved = await repository.update(updated, revisionRef.current)
+          revisionRef.current = saved.revision ?? revisionRef.current + 1
+          if (latestDocRef.current.updatedAt === updated.updatedAt) {
+            latestDocRef.current = { ...latestDocRef.current, revision: revisionRef.current }
+          }
+        } catch (error) {
+          if (error instanceof RevisionConflictError) {
+            toast('error', 'This document changed in another tab. Reload it before continuing.')
+          }
+          throw error
+        }
       },
       [repository],
     ),
@@ -127,7 +144,10 @@ export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewPro
 
   const exportToDocx = async () => {
     try {
-      flush()
+      if (!(await flush())) {
+        toast('error', 'Save failed. Export was cancelled so your changes are not hidden.')
+        return
+      }
       const blob = await exportDocx(latestDocRef.current)
       downloadBlob(blob, `${sanitizeFilename(latestDocRef.current.title, 'document')}.docx`)
     } catch (error) {
@@ -138,12 +158,15 @@ export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewPro
 
   const duplicate = async () => {
     try {
-      flush()
+      if (!(await flush())) {
+        toast('error', 'Save failed. Duplicate was cancelled to protect your changes.')
+        return
+      }
       const copy = createDocument(
         `${latestDocRef.current.title || 'Untitled document'} (copy)`,
         latestDocRef.current.content,
       )
-      await repository.save(copy)
+      await repository.insert(copy)
       onOpenDoc(copy)
     } catch (error) {
       console.error('[pword] duplicate failed', error)
@@ -153,9 +176,11 @@ export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewPro
 
   const remove = async () => {
     try {
+      await pauseAndDiscard()
       await repository.remove(latestDocRef.current.id)
       onBack()
     } catch (error) {
+      resume()
       console.error('[pword] delete failed', error)
       toast('error', "Couldn't delete this document.")
     }
@@ -163,9 +188,13 @@ export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewPro
 
   const importIntoNewDoc = async (file: File) => {
     try {
+      if (!(await flush())) {
+        toast('error', 'Save failed. Import was cancelled to protect your changes.')
+        return
+      }
       const result = await importDocx(file)
       const imported = createDocument(result.title, result.content)
-      await repository.save(imported)
+      await repository.insert(imported)
       onOpenDoc(imported)
       if (result.warnings > 0) {
         toast('info', `Imported with ${result.warnings} unsupported formatting note(s).`)
@@ -188,12 +217,20 @@ export function EditorView({ doc, repository, onBack, onOpenDoc }: EditorViewPro
         onTitleChange={handleTitleChange}
         saveState={saveState}
         onBack={() => {
-          flush()
-          onBack()
+          void (async () => {
+            if (await flush()) onBack()
+            else toast('error', 'Save failed. Stay on this document and try again.')
+          })()
         }}
         menu={(close) => (
           <>
-            <MenuItem icon={<FilePlus2 className="size-4" />} onSelect={() => { close(); flush(); onOpenDoc(createDocument()) }}>
+            <MenuItem icon={<FilePlus2 className="size-4" />} onSelect={() => {
+              close()
+              void (async () => {
+                if (await flush()) await onCreateDocument()
+                else toast('error', 'Save failed. Stay on this document and try again.')
+              })()
+            }}>
               New document
             </MenuItem>
             <MenuItem icon={<FileUp className="size-4" />} onSelect={() => { close(); importInputRef.current?.click() }}>
