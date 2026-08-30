@@ -162,5 +162,6 @@ option) any later version. See the [LICENSE](LICENSE) file for details.
 
 All bundled dependencies are AGPL-3.0-compatible (MIT, BSD, Apache-2.0).
 The embedded fonts (Inter, Literata, Lora, Playfair Display, Open Sans,
-JetBrains Mono) are licensed under the **SIL Open Font License 1.1** and are
-served from the application itself, not from an external CDN.
+Source Serif 4, Source Sans 3, IBM Plex Sans, JetBrains Mono, IBM Plex Mono)
+are licensed under the **SIL Open Font License 1.1** and are served from the
+application itself, not from an external CDN.

@@ -64,11 +64,15 @@ export function currentParagraphStyle(editor: Editor): ParagraphStyle {
 export const FONT_FAMILIES: { id: string; label: string; css: string }[] = [
   { id: 'serif', label: 'Serif', css: "'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif" },
   { id: 'literata', label: 'Literata', css: "'Literata Variable', Charter, Georgia, serif" },
+  { id: 'source-serif', label: 'Source Serif 4', css: "'Source Serif 4 Variable', Georgia, serif" },
   { id: 'lora', label: 'Lora', css: "'Lora Variable', Georgia, serif" },
   { id: 'playfair', label: 'Playfair Display', css: "'Playfair Display Variable', Georgia, serif" },
   { id: 'sans', label: 'Sans', css: "'Inter Variable', ui-sans-serif, system-ui, sans-serif" },
   { id: 'open-sans', label: 'Open Sans', css: "'Open Sans Variable', ui-sans-serif, system-ui, sans-serif" },
+  { id: 'source-sans', label: 'Source Sans 3', css: "'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif" },
+  { id: 'ibm-plex-sans', label: 'IBM Plex Sans', css: "'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif" },
   { id: 'mono', label: 'Mono', css: "ui-monospace, 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace" },
+  { id: 'ibm-plex-mono', label: 'IBM Plex Mono', css: "'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace" },
   { id: 'jetbrains', label: 'JetBrains Mono', css: "'JetBrains Mono Variable', ui-monospace, Menlo, Consolas, monospace" },
 ]
 

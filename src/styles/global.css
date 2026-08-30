@@ -3,6 +3,10 @@
 @import '@fontsource-variable/lora';
 @import '@fontsource-variable/playfair-display';
 @import '@fontsource-variable/open-sans';
+@import '@fontsource-variable/source-serif-4';
+@import '@fontsource-variable/source-sans-3';
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/ibm-plex-mono';
 @import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
 
