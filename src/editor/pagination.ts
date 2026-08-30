@@ -21,6 +21,7 @@ import { computePageBreaks, type BlockMetrics } from './page-math'
 const key = new PluginKey('pagePagination')
 
 const KEEP_NEXT_TYPES = new Set(['heading', 'docTitle', 'docSubtitle'])
+const EPS = 1
 
 interface SpacerRecord {
   pos: number
@@ -92,6 +93,7 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
     const dom = view.dom as HTMLElement
     const domChildren = Array.from(dom.children) as HTMLElement[]
     const metrics: BlockMetrics[] = []
+    const blockElements: HTMLElement[] = []
     let acc = 0
     let spacerIdx = 0
     let blockIdx = 0
@@ -104,6 +106,7 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
         continue
       }
       const cs = getComputedStyle(child)
+      blockElements.push(child)
       metrics.push({
         top: child.offsetTop - acc,
         height: child.offsetHeight,
@@ -115,6 +118,33 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
     }
 
     if (metrics.length !== docPositions.length) return // out of sync; retry later
+
+    // A paragraph can grow taller than one sheet while the user is typing.
+    // A spacer can only be inserted between blocks, so split that paragraph at
+    // the first line crossing a sheet boundary. The transaction preserves the
+    // text and lets the normal block pagination handle the new paragraph.
+    const pmRect = dom.getBoundingClientRect()
+    for (let i = 0; i < metrics.length; i += 1) {
+      const node = view.state.doc.child(i)
+      const element = blockElements[i]!
+      const metric = metrics[i]!
+      if (node.type.name !== 'paragraph' || metric.height <= capacity + EPS) continue
+
+      const top = element.getBoundingClientRect().top - pmRect.top
+      const page = Math.max(0, Math.floor(top / stride))
+      const boundary = pmRect.top + page * stride + capacity - 2
+      const rect = element.getBoundingClientRect()
+      if (!(rect.top < boundary && rect.bottom > boundary)) continue
+
+      const coords = view.posAtCoords({ left: rect.left + 4, top: boundary })
+      const start = docPositions[i]! + 1
+      const end = docPositions[i]! + node.nodeSize - 1
+      if (!coords || coords.pos <= start || coords.pos >= end) continue
+      if (view.state.doc.resolve(coords.pos).parent.type.name !== 'paragraph') continue
+
+      view.dispatch(view.state.tr.split(coords.pos))
+      return
+    }
 
     const { breaks, pageCount } = computePageBreaks(metrics, stride, capacity)
 
