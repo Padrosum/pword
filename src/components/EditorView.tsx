@@ -16,6 +16,7 @@ import { MenuItem, MenuSeparator } from './ui/Menu'
 import { buildExtensions } from '../editor/extensions'
 import { createPaginationPlugin } from '../editor/pagination'
 import { useAutosave } from '../hooks/useAutosave'
+import { clearPendingSave, consumePendingSave } from '../lib/lifecyclePersist'
 import { countCharacters, countWords } from '../lib/textStats'
 import { downloadBlob, sanitizeFilename } from '../lib/download'
 import { toast } from '../lib/toast'
@@ -24,6 +25,7 @@ import {
   createDocument,
   RevisionConflictError,
 } from '../storage/documents'
+import { isQuotaError } from '../storage/db'
 import { exportDocx } from '../export/docx'
 import { printDocument } from '../export/print'
 import { importDocx } from '../import/docx'
@@ -48,6 +50,13 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
   const latestDocRef = useRef<PadDocument>(doc)
   const titleRef = useRef(title)
   const revisionRef = useRef(doc.revision ?? 0)
+  const conflictNotifiedRef = useRef(false)
+  const recoveredRef = useRef(false)
+
+  useEffect(() => {
+    conflictNotifiedRef.current = false
+    recoveredRef.current = false
+  }, [doc.id])
 
   useEffect(() => {
     titleRef.current = title
@@ -68,12 +77,18 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
         try {
           const saved = await repository.update(updated, revisionRef.current)
           revisionRef.current = saved.revision ?? revisionRef.current + 1
+          clearPendingSave(updated.id)
           if (latestDocRef.current.updatedAt === updated.updatedAt) {
             latestDocRef.current = { ...latestDocRef.current, revision: revisionRef.current }
           }
         } catch (error) {
           if (error instanceof RevisionConflictError) {
-            toast('error', 'This document changed in another tab. Reload it before continuing.')
+            if (!conflictNotifiedRef.current) {
+              conflictNotifiedRef.current = true
+              toast('error', 'This document changed in another tab. Reload it before continuing.')
+            }
+          } else if (isQuotaError(error)) {
+            toast('error', 'Storage is full on this device. Remove images or free browser storage.')
           }
           throw error
         }
@@ -119,6 +134,34 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
     },
   })
 
+  // Recover a synchronous sessionStorage snapshot written during pagehide.
+  useEffect(() => {
+    if (!editor || recoveredRef.current) return
+    recoveredRef.current = true
+
+    const pending = consumePendingSave(doc.id)
+    if (!pending || pending.updatedAt <= doc.updatedAt) return
+
+    editor.commands.setContent(pending.content, false)
+    setTitle(pending.title)
+    titleRef.current = pending.title
+    const text = jsonToPlainText(pending.content)
+    const restored: PadDocument = {
+      ...pending,
+      revision: revisionRef.current,
+      wordCount: countWords(text),
+      charCount: countCharacters(text),
+    }
+    latestDocRef.current = restored
+    setStats((prev) => ({
+      ...prev,
+      words: restored.wordCount,
+      chars: restored.charCount,
+    }))
+    schedule(restored)
+    toast('info', 'Restored unsaved changes from your last session.')
+  }, [doc.id, doc.updatedAt, editor, schedule])
+
   const handleTitleChange = (nextTitle: string) => {
     setTitle(nextTitle)
     const updated: PadDocument = {
@@ -135,7 +178,9 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
         event.preventDefault()
-        flush()
+        void flush().then((saved) => {
+          if (!saved) toast('error', 'Save failed. Try again in a moment.')
+        })
       }
     }
     window.addEventListener('keydown', onKeyDown)

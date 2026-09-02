@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { computePageBreaks, type BlockMetrics } from './page-math'
+import { describe, expect, it, vi } from 'vitest'
+import { computePageBreaks, measureNaturalBlocks, type BlockMetrics } from './page-math'
 
 // Convenience block factory: heights in "px" of a test grid where a sheet
 // has stride 1000 and capacity 800 (i.e. 200px of inter-sheet flow gap).
@@ -94,5 +94,45 @@ describe('computePageBreaks', () => {
   it('does not break before the very first block', () => {
     const result = computePageBreaks([b(0, 900)], STRIDE, CAPACITY)
     expect(result.breaks).toEqual([])
+  })
+
+  it('aligns page 2 content to the sheet edge when contentStartOffset is set', () => {
+    const offset = 100
+    const blocks = [b(0, 700), b(700, 700)]
+    const result = computePageBreaks(blocks, STRIDE, CAPACITY, offset)
+
+    expect(result.breaks).toHaveLength(1)
+    const pushedTop = blocks[1]!.top + result.breaks[0]!.height
+    expect(pushedTop).toBe(STRIDE - offset)
+  })
+
+  it('ignores empty blocks when packing pages', () => {
+    const blocks = [b(0, 700), b(700, 0), b(700, 700)]
+    const result = computePageBreaks(blocks, STRIDE, CAPACITY)
+    expect(result.breaks).toHaveLength(1)
+    expect(result.breaks[0]!.index).toBe(2)
+  })
+})
+
+describe('measureNaturalBlocks', () => {
+  it('builds cumulative tops from block heights and margins', () => {
+    const first = document.createElement('p')
+    const second = document.createElement('p')
+    first.textContent = 'First block'
+    second.textContent = 'Second block'
+    Object.defineProperty(first, 'offsetHeight', { value: 100 })
+    Object.defineProperty(second, 'offsetHeight', { value: 200 })
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => {
+      const style = { marginTop: '0px', marginBottom: '0px' } as CSSStyleDeclaration
+      if (el === second) style.marginTop = '12px'
+      return style
+    })
+
+    const metrics = measureNaturalBlocks([first, second], [false, false])
+    expect(metrics).toHaveLength(2)
+    expect(metrics[0]!.top).toBe(0)
+    expect(metrics[0]!.height).toBe(100)
+    expect(metrics[1]!.top).toBe(112)
+    expect(metrics[1]!.height).toBe(200)
   })
 })

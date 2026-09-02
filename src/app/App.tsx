@@ -22,10 +22,13 @@ export default function App() {
   const [importing, setImporting] = useState(false)
 
   const persistSettings = useCallback(
-    (next: AppSettings) => {
-      setSettings(next)
-      void settingsRepository.save(next).catch((error) => {
-        console.error('[pword] could not persist settings', error)
+    (patch: Partial<AppSettings> | ((prev: AppSettings) => AppSettings)) => {
+      setSettings((prev) => {
+        const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch }
+        void settingsRepository.save(next).catch((error) => {
+          console.error('[pword] could not persist settings', error)
+        })
+        return next
       })
     },
     [settingsRepository],
@@ -64,19 +67,19 @@ export default function App() {
   const openDocument = useCallback(
     (doc: PadDocument) => {
       setOpenDoc(doc)
-      persistSettings({ ...settings, lastOpenedId: doc.id })
+      persistSettings({ lastOpenedId: doc.id })
     },
-    [persistSettings, settings],
+    [persistSettings],
   )
 
   const goHome = useCallback(() => {
     setOpenDoc(null)
-    persistSettings({ ...settings, lastOpenedId: null })
+    persistSettings({ lastOpenedId: null })
     void docsRepository
       .list()
       .then(setDocs)
       .catch((error) => console.error('[pword] could not refresh documents', error))
-  }, [docsRepository, persistSettings, settings])
+  }, [docsRepository, persistSettings])
 
   const createAndOpen = useCallback(async () => {
     try {
@@ -111,12 +114,15 @@ export default function App() {
         await docsRepository.remove(doc.id)
         setDocs((prev) => (prev ? prev.filter((d) => d.id !== doc.id) : prev))
         if (openDoc?.id === doc.id) setOpenDoc(null)
+        persistSettings((prev) =>
+          prev.lastOpenedId === doc.id ? { ...prev, lastOpenedId: null } : prev,
+        )
       } catch (error) {
         console.error('[pword] could not delete document', error)
         toast('error', "Couldn't delete this document.")
       }
     },
-    [docsRepository, openDoc],
+    [docsRepository, openDoc, persistSettings],
   )
 
   const importDocument = useCallback(
@@ -156,7 +162,7 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider initialMode={settings.theme} onModeChange={(mode) => persistSettings({ ...settings, theme: mode })}>
+    <ThemeProvider initialMode={settings.theme} onModeChange={(mode) => persistSettings({ theme: mode })}>
       {openDoc ? (
         <EditorView
           key={openDoc.id}

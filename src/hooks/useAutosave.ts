@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { lifecycleFlush, stashPendingSave } from '../lib/lifecyclePersist'
 import type { PadDocument, SaveState } from '../types/document'
+
+export { lifecycleFlush } from '../lib/lifecyclePersist'
 
 /**
  * Debounced, serialized autosave for a document.
@@ -19,12 +22,17 @@ export function useAutosave(
   resume: () => void
 } {
   const [state, setState] = useState<SaveState>('saved')
+  const stateRef = useRef<SaveState>('saved')
   const persistRef = useRef(persist)
   const pendingRef = useRef<PadDocument | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const runningRef = useRef<Promise<void> | null>(null)
   const aliveRef = useRef(true)
   const flushOnCleanupRef = useRef(true)
+
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
 
   useEffect(() => {
     persistRef.current = persist
@@ -107,24 +115,45 @@ export function useAutosave(
   }, [])
 
   useEffect(() => {
-    const flushNow = () => {
-      void flush()
-    }
-    const onVisibility = () => {
-      if (document.visibilityState === 'hidden') flushNow()
+    const hasPendingSave = () =>
+      pendingRef.current !== null ||
+      timerRef.current !== null ||
+      stateRef.current === 'unsaved' ||
+      stateRef.current === 'saving' ||
+      stateRef.current === 'error'
+
+    const runLifecycleSave = () => {
+      if (pendingRef.current) stashPendingSave(pendingRef.current)
+      void lifecycleFlush(flush)
     }
 
-    window.addEventListener('pagehide', flushNow)
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasPendingSave()) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    const onPageHide = () => {
+      runLifecycleSave()
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') runLifecycleSave()
+    }
+
+    window.addEventListener('beforeunload', onBeforeUnload)
+    window.addEventListener('pagehide', onPageHide)
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
-      window.removeEventListener('pagehide', flushNow)
+      window.removeEventListener('beforeunload', onBeforeUnload)
+      window.removeEventListener('pagehide', onPageHide)
       document.removeEventListener('visibilitychange', onVisibility)
       aliveRef.current = false
       if (timerRef.current !== null) clearTimeout(timerRef.current)
       timerRef.current = null
-      if (flushOnCleanupRef.current) void drain()
+      if (flushOnCleanupRef.current) void flush()
     }
-  }, [drain, flush])
+  }, [flush])
 
   return { state, schedule, flush, pauseAndDiscard, resume }
 }

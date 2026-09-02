@@ -1,7 +1,8 @@
 import { act, fireEvent, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useAutosave } from './useAutosave'
+import { lifecycleFlush, useAutosave } from './useAutosave'
 import { createDocument } from '../storage/documents'
+import { PENDING_SAVE_PREFIX } from '../lib/lifecyclePersist'
 import type { PadDocument } from '../types/document'
 
 describe('useAutosave', () => {
@@ -103,6 +104,67 @@ describe('useAutosave', () => {
     })
 
     expect(persist).toHaveBeenCalledWith(doc)
+    expect(result.current.state).toBe('saved')
+  })
+
+  it('lifecycleFlush awaits flush before returning', async () => {
+    vi.useRealTimers()
+
+    const order: string[] = []
+    const flush = vi.fn(async () => {
+      order.push('flush-start')
+      await new Promise<void>((resolve) => setTimeout(resolve, 10))
+      order.push('flush-end')
+      return true
+    })
+
+    await lifecycleFlush(flush)
+    expect(order).toEqual(['flush-start', 'flush-end'])
+
+    vi.useFakeTimers()
+  })
+
+  it('regression: pagehide stashes pending work and completes flush', async () => {
+    sessionStorage.clear()
+
+    const persist = vi.fn().mockResolvedValue(undefined)
+    const { result } = renderHook(() => useAutosave(persist, 900))
+    const doc = createDocument('tab-close')
+    act(() => result.current.schedule(doc))
+
+    await act(async () => {
+      fireEvent(window, new Event('pagehide'))
+      await Promise.resolve()
+    })
+
+    expect(persist).toHaveBeenCalledWith(doc)
+    expect(result.current.state).toBe('saved')
+    expect(sessionStorage.getItem(`${PENDING_SAVE_PREFIX}${doc.id}`)).toBeTruthy()
+  })
+
+  it('regression: visibilitychange(hidden) completes flush', async () => {
+    const persist = vi.fn().mockResolvedValue(undefined)
+    const { result } = renderHook(() => useAutosave(persist, 900))
+    const doc = createDocument('tab-hidden')
+    act(() => result.current.schedule(doc))
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'hidden',
+    })
+
+    await act(async () => {
+      fireEvent(document, new Event('visibilitychange'))
+      await Promise.resolve()
+    })
+
+    expect(persist).toHaveBeenCalledWith(doc)
+    expect(result.current.state).toBe('saved')
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'visible',
+    })
   })
 
   it('reports an error state when persisting fails', async () => {

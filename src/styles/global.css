@@ -183,6 +183,10 @@ select optgroup {
 }
 
 .page-spacer {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
   pointer-events: none;
   user-select: none;
 }
@@ -199,13 +203,35 @@ select optgroup {
      empty document exactly fills the first page without overflowing. */
   min-height: 24.8cm;
   display: flow-root;
-  /* Offset parent for the pagination plugin's block measurements. */
-  position: relative;
   word-wrap: break-word;
 }
 
 .ProseMirror p {
   margin-block: 0.4em;
+}
+
+/* Collapsed by the pagination plugin for empty TipTap paragraphs. */
+.ProseMirror p.page-empty-para,
+.ProseMirror p:not(.is-editor-empty):where(
+  :empty,
+  :has(> br:only-child),
+  :has(> br.ProseMirror-trailingBreak:only-child)
+) {
+  margin: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+  line-height: 0;
+  padding: 0;
+}
+
+.ProseMirror p.page-empty-para::before,
+.ProseMirror p:not(.is-editor-empty):where(
+  :empty,
+  :has(> br:only-child),
+  :has(> br.ProseMirror-trailingBreak:only-child)
+)::before {
+  display: none;
 }
 
 .ProseMirror h1 {
