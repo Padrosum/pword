@@ -1,0 +1,10 @@
+---
+description: Never credit Cursor as a project supporter or sponsor
+alwaysApply: true
+---
+
+# No Cursor in credits
+
+Never list Cursor (IDE, company, agents, Autopilot) in README, MARKETING, ABOUT, sponsors, supporters, acknowledgements, thanks, credits, "built with", badges, footers, or Padros family / ecosystem lists — any language.
+
+Build tools are not product supporters. Omit Cursor from tool credits unless the user explicitly asks to name Cursor.
