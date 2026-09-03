@@ -4,6 +4,7 @@ import { HomeView } from '../components/HomeView'
 import { Toaster } from '../components/Toaster'
 import { BrandMark } from '../components/BrandMark'
 import { ThemeProvider } from '../hooks/useTheme'
+import { I18nProvider } from '../i18n'
 import { toast } from '../lib/toast'
 import { createDocument, DocumentRepository } from '../storage/documents'
 import { Database } from '../storage/db'
@@ -152,18 +153,15 @@ export default function App() {
     [docsRepository, openDocument],
   )
 
-  if (!docs) {
-    return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-3 text-muted">
-        <BrandMark className="size-10" />
-        <p className="text-sm" role="status">Loading…</p>
-      </div>
-    )
-  }
-
   return (
+    <I18nProvider initialLocale={settings.locale} onLocaleChange={(locale) => persistSettings({ locale })}>
     <ThemeProvider initialMode={settings.theme} onModeChange={(mode) => persistSettings({ theme: mode })}>
-      {openDoc ? (
+      {!docs ? (
+        <div className="flex min-h-dvh flex-col items-center justify-center gap-3 text-muted">
+          <BrandMark className="size-10" />
+          <p className="text-sm" role="status">Loading…</p>
+        </div>
+      ) : openDoc ? (
         <EditorView
           key={openDoc.id}
           doc={openDoc}
@@ -185,5 +183,6 @@ export default function App() {
       )}
       <Toaster />
     </ThemeProvider>
+    </I18nProvider>
   )
 }

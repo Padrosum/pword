@@ -2,7 +2,7 @@
 
 [English](README.md) · **Türkçe**
 
-<img src="public/icon.svg" width="72" alt="Pword logosu" />
+<img src="docs/logo.png" width="72" height="72" alt="Pword logosu" />
 
 # Pword
 
@@ -18,6 +18,7 @@ Yazdığınız her şey yalnızca **sizin cihazınızda** saklanır.
 [**Pword'ü Aç**](https://pword.alihankarakus.com) ·
 [Nedir?](#nedir) ·
 [Özellikler](#özellikler) ·
+[Neden bulut değil?](MARKETING.md) ·
 [Mimari](#mimari)
 
 </div>
@@ -32,18 +33,19 @@ devam edersiniz. Microsoft Word'ün klonu olmaya çalışmaz — hızlı, sakin 
 özgün bir yazma deneyimi sunar.
 
 <div align="center">
-  <img src="docs/screenshots/home.png" width="820" alt="Pword ana ekranı — son belgeler ve yeni belge" />
-  <p><em>Ana ekran: son belgeler, tek tıkla yazmaya başlangıç.</em></p>
+  <img src="docs/screenshots/home.png" width="820" alt="Pword ana ekranı — Yazı masası, boş belgeler, açık tema" />
+  <p><em>Ana ekran: bu cihazdaki yazı masası — yazmaya başla veya .docx içe aktar.</em></p>
 </div>
 
 <div align="center">
-  <img src="docs/screenshots/editor.png" width="49%" alt="Pword editörü — A4 sayfa görünümü, açık tema" />
-  <img src="docs/screenshots/editor-dark.png" width="49%" alt="Pword editörü — koyu tema, kağıt görünümü korunur" />
-  <p><em>Editör: gerçek A4 sayfa görünümü · koyu temada bile kağıt gibi okunur.</em></p>
+  <img src="docs/screenshots/editor.png" width="49%" alt="Pword editörü — A4 prova, açık tema" />
+  <img src="docs/screenshots/editor-dark.png" width="49%" alt="Pword editörü — koyu masa, kağıt korunur" />
+  <p><em>Editör: gerçek A4 sayfalar · masa koyu olsa da yaprak kâğıt kalır.</em></p>
 </div>
 
 <div align="center">
-  <img src="docs/screenshots/home-dark.png" width="820" alt="Pword ana ekranı — koyu tema" />
+  <img src="docs/screenshots/home-dark.png" width="820" alt="Pword ana ekranı — son belgeler, koyu tema" />
+  <p><em>Gece aynı masa: son belgeler; dil ve tema bu cihazda kalır.</em></p>
 </div>
 
 ## Özellikler
@@ -75,6 +77,7 @@ devam edersiniz. Microsoft Word'ün klonu olmaya çalışmaz — hızlı, sakin 
 **Gizlilik ve çevrimdışı**
 
 - Hesap yok, arka uç yok, analitik yok, telemetri yok
+- İngilizce / Türkçe arayüz (düğme; bu cihazda hatırlanır)
 - İlk yüklemeden sonra tamamen çevrimdışı çalışır; kurulabilir PWA
 - Yazı tipleri dahil hiçbir dış kaynak yüklenmez
 
@@ -118,6 +121,7 @@ src/
   export/      .docx dışa aktarma, yazdırma
   pwa/         service worker kaydı
   hooks/       useAutosave, useTheme
+  i18n/        İngilizce / Türkçe arayüz metinleri
   lib/         küçük yardımcılar
   types/       belge modeli tipleri
   styles/      tasarım token'ları, editör tipografisi, baskı stilleri

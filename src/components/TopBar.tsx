@@ -1,11 +1,12 @@
 import { ArrowLeft, MoreHorizontal } from 'lucide-react'
+import { useI18n } from '../i18n'
 import { BrandMark } from './BrandMark'
 import { ThemeToggle } from './ThemeToggle'
+import { LanguageToggle } from './LanguageToggle'
 import { IconButton } from './ui/IconButton'
 import { Menu } from './ui/Menu'
 import type { SaveState } from '../types/document'
 import { cn } from '../lib/cn'
-import { SAVE_STATE_LABEL } from '../lib/saveState'
 
 interface TopBarProps {
   title: string
@@ -16,10 +17,11 @@ interface TopBarProps {
 }
 
 export function TopBar({ title, onTitleChange, saveState, onBack, menu }: TopBarProps) {
+  const { t } = useI18n()
   return (
     <header className="galley-rail no-print border-b border-line bg-surface">
       <div className="mx-auto flex h-11 max-w-6xl items-center gap-1.5 px-2 sm:px-4">
-        <IconButton label="Back to documents" onClick={onBack}>
+        <IconButton label={t.backToDocuments} onClick={onBack}>
           <ArrowLeft className="size-4" />
         </IconButton>
         <div className="hidden items-center gap-2 sm:flex">
@@ -32,8 +34,8 @@ export function TopBar({ title, onTitleChange, saveState, onBack, menu }: TopBar
             type="text"
             value={title}
             onChange={(event) => onTitleChange(event.target.value)}
-            aria-label="Document title"
-            placeholder="Untitled document"
+            aria-label={t.documentTitle}
+            placeholder={t.untitledDocument}
             className="h-8 w-full max-w-sm border border-transparent bg-transparent px-2 text-center text-sm font-medium text-ink outline-none transition-colors hover:border-line focus:border-line focus:bg-canvas"
           />
         </div>
@@ -45,16 +47,17 @@ export function TopBar({ title, onTitleChange, saveState, onBack, menu }: TopBar
           )}
           role="status"
         >
-          {SAVE_STATE_LABEL[saveState]}
+          {({ saved: t.proofSaved, saving: t.saving, unsaved: t.unsavedMarks, error: t.saveFailed } as const)[saveState]}
         </span>
 
+        <LanguageToggle />
         <ThemeToggle />
 
         <Menu
-          label="Document menu"
+          label={t.documentMenu}
           align="end"
           trigger={({ toggle, open }) => (
-            <IconButton label="Document menu" onClick={toggle} aria-haspopup="menu" aria-expanded={open}>
+            <IconButton label={t.documentMenu} onClick={toggle} aria-haspopup="menu" aria-expanded={open}>
               <MoreHorizontal className="size-4" />
             </IconButton>
           )}

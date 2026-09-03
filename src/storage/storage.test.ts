@@ -130,7 +130,7 @@ describe('SettingsRepository', () => {
 
   it('persists and merges settings', async () => {
     await repository.save({ theme: 'dark', lastOpenedId: 'doc-1' })
-    expect(await repository.load()).toEqual({ theme: 'dark', lastOpenedId: 'doc-1' })
+    expect(await repository.load()).toEqual({ theme: 'dark', locale: 'en', lastOpenedId: 'doc-1' })
   })
 })
 

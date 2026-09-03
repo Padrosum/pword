@@ -2,7 +2,7 @@
 
 **English** · [Türkçe](README.tr.md)
 
-<img src="public/icon.svg" width="72" alt="Pword logo" />
+<img src="docs/logo.png" width="72" height="72" alt="Pword logo" />
 
 # Pword
 
@@ -18,6 +18,7 @@ no tracking. Everything you write is stored **only on your device**.
 [**Open Pword**](https://pword.alihankarakus.com) ·
 [What is it?](#what-is-it) ·
 [Features](#features) ·
+[Why not the cloud?](MARKETING.md) ·
 [Architecture](#architecture)
 
 </div>
@@ -32,18 +33,19 @@ off. It doesn't try to be a Microsoft Word clone — it offers a fast, calm,
 and original writing experience.
 
 <div align="center">
-  <img src="docs/screenshots/home.png" width="820" alt="Pword home screen — recent documents and new document" />
-  <p><em>Home screen: recent documents, one click to start writing.</em></p>
+  <img src="docs/screenshots/home.png" width="820" alt="Pword home — Proof desk, empty galleys, light theme" />
+  <p><em>Home: proof desk on this device — start writing or import a .docx.</em></p>
 </div>
 
 <div align="center">
-  <img src="docs/screenshots/editor.png" width="49%" alt="Pword editor — A4 page view, light theme" />
-  <img src="docs/screenshots/editor-dark.png" width="49%" alt="Pword editor — dark theme, paper look preserved" />
-  <p><em>Editor: real A4 page view · stays readable like paper even in dark mode.</em></p>
+  <img src="docs/screenshots/editor.png" width="49%" alt="Pword editor — A4 galley, light theme" />
+  <img src="docs/screenshots/editor-dark.png" width="49%" alt="Pword editor — dark desk, paper sheet preserved" />
+  <p><em>Editor: real A4 galleys · the sheet stays paper even when the desk is dark.</em></p>
 </div>
 
 <div align="center">
-  <img src="docs/screenshots/home-dark.png" width="820" alt="Pword home screen — dark theme" />
+  <img src="docs/screenshots/home-dark.png" width="820" alt="Pword home — recent galleys, dark theme" />
+  <p><em>Same desk at night: recent galleys, language and theme stay on this device.</em></p>
 </div>
 
 ## Features
@@ -75,6 +77,7 @@ and original writing experience.
 **Privacy and offline**
 
 - No account, no backend, no analytics, no telemetry
+- English / Türkçe interface (toggle; remembered on this device)
 - Works fully offline after the first load; installable PWA
 - No external resources are loaded, fonts included
 
@@ -117,6 +120,7 @@ src/
   export/      .docx export, printing
   pwa/         service worker registration
   hooks/       useAutosave, useTheme
+  i18n/        English / Turkish UI strings
   lib/         small helpers
   types/       document model types
   styles/      design tokens, editor typography, print styles

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useI18n } from '../i18n'
 import type { Editor } from '@tiptap/core'
 import { useEditorState } from '@tiptap/react'
 import {
@@ -83,6 +84,7 @@ interface ToolbarState {
 }
 
 export function Toolbar({ editor }: { editor: Editor }) {
+  const { t } = useI18n()
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -118,36 +120,36 @@ export function Toolbar({ editor }: { editor: Editor }) {
 
   const insertImage = (file: File) => {
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      toast('error', 'Unsupported image type. Use PNG, JPEG, GIF or WebP.')
+      toast('error', t.unsupportedImageType)
       return
     }
     if (file.size > MAX_IMAGE_BYTES) {
-      toast('error', 'Image is too large. Maximum size is 5 MB.')
+      toast('error', t.imageTooLarge)
       return
     }
     const reader = new FileReader()
     reader.onload = () => {
       editor.chain().focus().setImage({ src: reader.result as string, alt: file.name }).run()
     }
-    reader.onerror = () => toast('error', 'Could not read that image file.')
+    reader.onerror = () => toast('error', t.imageReadError)
     reader.readAsDataURL(file)
   }
 
   const chain = () => editor.chain().focus()
 
   return (
-    <div className="galley-rail no-print border-b border-line bg-surface" role="toolbar" aria-label="Formatting">
+    <div className="galley-rail no-print border-b border-line bg-surface" role="toolbar" aria-label={t.formatting}>
       <div className="no-scrollbar mx-auto flex max-w-6xl items-center gap-0.5 overflow-x-auto px-2 py-1 sm:px-4">
-        <IconButton label="Undo" onClick={() => chain().undo().run()} disabled={!s.canUndo}>
+        <IconButton label={t.undo} onClick={() => chain().undo().run()} disabled={!s.canUndo}>
           <Undo2 className="size-4" />
         </IconButton>
-        <IconButton label="Redo" onClick={() => chain().redo().run()} disabled={!s.canRedo}>
+        <IconButton label={t.redo} onClick={() => chain().redo().run()} disabled={!s.canRedo}>
           <Redo2 className="size-4" />
         </IconButton>
 
         <ToolbarDivider />
 
-        <Select label="Paragraph style" className="mx-0.5" value={s.styleId} onChange={(id) => {
+        <Select label={t.paragraphStyle} className="mx-0.5" value={s.styleId} onChange={(id) => {
           const style = PARAGRAPH_STYLES.find((p) => p.id === id)
           if (style) style.apply(editor)
         }}>
@@ -156,13 +158,13 @@ export function Toolbar({ editor }: { editor: Editor }) {
           ))}
         </Select>
 
-        <Select label="Font" className="mx-0.5" value={s.fontId} onChange={(id) => chain().setFontFamily(fontIdToCss(id)).run()}>
+        <Select label={t.font} className="mx-0.5" value={s.fontId} onChange={(id) => chain().setFontFamily(fontIdToCss(id)).run()}>
           {FONT_FAMILIES.map((f) => (
             <option key={f.id} value={f.id}>{f.label}</option>
           ))}
         </Select>
 
-        <Select label="Font size" className="mx-0.5" value={s.fontSize} onChange={(size) => {
+        <Select label={t.fontSize} className="mx-0.5" value={s.fontSize} onChange={(size) => {
           if (size === '12pt') chain().unsetFontSize().run()
           else chain().setFontSize(size).run()
         }}>
@@ -173,23 +175,23 @@ export function Toolbar({ editor }: { editor: Editor }) {
 
         <ToolbarDivider />
 
-        <IconButton label="Bold" active={s.bold} onClick={() => chain().toggleBold().run()}>
+        <IconButton label={t.bold} active={s.bold} onClick={() => chain().toggleBold().run()}>
           <Bold className="size-4" />
         </IconButton>
-        <IconButton label="Italic" active={s.italic} onClick={() => chain().toggleItalic().run()}>
+        <IconButton label={t.italic} active={s.italic} onClick={() => chain().toggleItalic().run()}>
           <Italic className="size-4" />
         </IconButton>
-        <IconButton label="Underline" active={s.underline} onClick={() => chain().toggleUnderline().run()}>
+        <IconButton label={t.underline} active={s.underline} onClick={() => chain().toggleUnderline().run()}>
           <UnderlineIcon className="size-4" />
         </IconButton>
-        <IconButton label="Strikethrough" active={s.strike} onClick={() => chain().toggleStrike().run()}>
+        <IconButton label={t.strikethrough} active={s.strike} onClick={() => chain().toggleStrike().run()}>
           <Strikethrough className="size-4" />
         </IconButton>
 
         <ToolbarDivider />
 
-        <Menu label="Text color" trigger={({ toggle, open }) => (
-          <IconButton label="Text color" onClick={toggle} aria-haspopup="menu" aria-expanded={open}
+        <Menu label={t.textColor} trigger={({ toggle, open }) => (
+          <IconButton label={t.textColor} onClick={toggle} aria-haspopup="menu" aria-expanded={open}
             className={s.color && s.color !== TEXT_COLORS[0]!.value ? 'bg-accent-soft' : undefined}>
             <Baseline className="size-4" style={s.color ? { color: s.color } : undefined} />
           </IconButton>
@@ -202,8 +204,8 @@ export function Toolbar({ editor }: { editor: Editor }) {
           )}
         </Menu>
 
-        <Menu label="Highlight" trigger={({ toggle, open }) => (
-          <IconButton label="Highlight" onClick={toggle} aria-haspopup="menu" aria-expanded={open} active={!!s.highlight}>
+        <Menu label={t.highlight} trigger={({ toggle, open }) => (
+          <IconButton label={t.highlight} onClick={toggle} aria-haspopup="menu" aria-expanded={open} active={!!s.highlight}>
             <Highlighter className="size-4" />
           </IconButton>
         )}>
@@ -217,8 +219,8 @@ export function Toolbar({ editor }: { editor: Editor }) {
 
         <ToolbarDivider />
 
-        <Menu label="Alignment" trigger={({ toggle, open }) => (
-          <IconButton label={`Alignment: ${s.align}`} onClick={toggle} aria-haspopup="menu" aria-expanded={open}>
+        <Menu label={t.alignLeft} trigger={({ toggle, open }) => (
+          <IconButton label={`${t.alignLeft}: ${s.align}`} onClick={toggle} aria-haspopup="menu" aria-expanded={open}>
             {s.align === 'center' ? <AlignCenter className="size-4" />
               : s.align === 'right' ? <AlignRight className="size-4" />
               : s.align === 'justify' ? <AlignJustify className="size-4" />
@@ -228,24 +230,24 @@ export function Toolbar({ editor }: { editor: Editor }) {
         )}>
           {(close) => (
             <>
-              <MenuItem icon={<AlignLeft className="size-4" />} onSelect={() => { chain().setTextAlign('left').run(); close() }}>Left</MenuItem>
-              <MenuItem icon={<AlignCenter className="size-4" />} onSelect={() => { chain().setTextAlign('center').run(); close() }}>Center</MenuItem>
-              <MenuItem icon={<AlignRight className="size-4" />} onSelect={() => { chain().setTextAlign('right').run(); close() }}>Right</MenuItem>
-              <MenuItem icon={<AlignJustify className="size-4" />} onSelect={() => { chain().setTextAlign('justify').run(); close() }}>Justify</MenuItem>
+              <MenuItem icon={<AlignLeft className="size-4" />} onSelect={() => { chain().setTextAlign('left').run(); close() }}>{t.alignLeft}</MenuItem>
+              <MenuItem icon={<AlignCenter className="size-4" />} onSelect={() => { chain().setTextAlign('center').run(); close() }}>{t.alignCenter}</MenuItem>
+              <MenuItem icon={<AlignRight className="size-4" />} onSelect={() => { chain().setTextAlign('right').run(); close() }}>{t.alignRight}</MenuItem>
+              <MenuItem icon={<AlignJustify className="size-4" />} onSelect={() => { chain().setTextAlign('justify').run(); close() }}>{t.alignJustify}</MenuItem>
             </>
           )}
         </Menu>
 
-        <IconButton label="Bullet list" active={s.bullet} onClick={() => chain().toggleBulletList().run()}>
+        <IconButton label={t.bulletList} active={s.bullet} onClick={() => chain().toggleBulletList().run()}>
           <List className="size-4" />
         </IconButton>
-        <IconButton label="Numbered list" active={s.ordered} onClick={() => chain().toggleOrderedList().run()}>
+        <IconButton label={t.numberedList} active={s.ordered} onClick={() => chain().toggleOrderedList().run()}>
           <ListOrdered className="size-4" />
         </IconButton>
 
         <ToolbarDivider />
 
-        <IconButton label={s.hasLink ? 'Edit link' : 'Add link'} active={s.hasLink} onClick={() => setLinkDialogOpen(true)}>
+        <IconButton label={t.insertLink} active={s.hasLink} onClick={() => setLinkDialogOpen(true)}>
           <Link2 className="size-4" />
         </IconButton>
 
@@ -258,17 +260,17 @@ export function Toolbar({ editor }: { editor: Editor }) {
           {(close) => (
             <>
               <MenuItem icon={<ImageIcon className="size-4" />} onSelect={() => { fileInputRef.current?.click(); close() }}>Image…</MenuItem>
-              <MenuItem icon={<TableIcon className="size-4" />} onSelect={() => { chain().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(); close() }}>Table</MenuItem>
-              <MenuItem icon={<Minus className="size-4" />} onSelect={() => { chain().setHorizontalRule().run(); close() }}>Horizontal rule</MenuItem>
-              <MenuItem icon={<SquareSplitVertical className="size-4" />} onSelect={() => { chain().setPageBreak().run(); close() }}>Page break</MenuItem>
-              <MenuItem icon={<ListTodo className="size-4" />} onSelect={() => { chain().toggleTaskList().run(); close() }}>Checklist</MenuItem>
+              <MenuItem icon={<TableIcon className="size-4" />} onSelect={() => { chain().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(); close() }}>{t.insertTable}</MenuItem>
+              <MenuItem icon={<Minus className="size-4" />} onSelect={() => { chain().setHorizontalRule().run(); close() }}>{t.horizontalRule}</MenuItem>
+              <MenuItem icon={<SquareSplitVertical className="size-4" />} onSelect={() => { chain().setPageBreak().run(); close() }}>{t.pageBreak}</MenuItem>
+              <MenuItem icon={<ListTodo className="size-4" />} onSelect={() => { chain().toggleTaskList().run(); close() }}>{t.checklist}</MenuItem>
             </>
           )}
         </Menu>
 
         <ToolbarDivider />
 
-        <IconButton label="Clear formatting" onClick={() => chain().unsetAllMarks().clearNodes().run()}>
+        <IconButton label={t.clearFormatting} onClick={() => chain().unsetAllMarks().clearNodes().run()}>
           <RemoveFormatting className="size-4" />
         </IconButton>
       </div>
@@ -368,6 +370,7 @@ function LinkDialog({ open, editor, onClose }: { open: boolean; editor: Editor; 
 }
 
 function LinkDialogInner({ editor, initialHref, onClose }: { editor: Editor; initialHref: string; onClose: () => void }) {
+  const { t } = useI18n()
   const [url, setUrl] = useState(initialHref)
 
   const apply = () => {
@@ -384,7 +387,7 @@ function LinkDialogInner({ editor, initialHref, onClose }: { editor: Editor; ini
     <Dialog
       open
       onClose={onClose}
-      title="Link"
+      title={t.insertLink}
       description="Links open in a new tab. Everything stays on your device."
     >
       <form
@@ -396,7 +399,7 @@ function LinkDialogInner({ editor, initialHref, onClose }: { editor: Editor; ini
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://example.com"
-          aria-label="Link URL"
+          aria-label={t.linkUrl}
           className="h-9 w-full border border-line bg-canvas px-3 text-sm text-ink outline-none focus:border-accent"
         />
         <div className="flex justify-end gap-2">
@@ -406,14 +409,14 @@ function LinkDialogInner({ editor, initialHref, onClose }: { editor: Editor; ini
               onClick={() => { editor.chain().focus().extendMarkRange('link').unsetLink().run(); onClose() }}
               className="h-9 px-3 text-sm text-danger hover:bg-accent-soft"
             >
-              Remove link
+              {t.removeLink}
             </button>
           )}
           <button
             type="submit"
             className="h-9 bg-accent px-4 text-sm font-medium text-accent-contrast hover:opacity-90"
           >
-            Apply
+            {t.apply}
           </button>
         </div>
       </form>

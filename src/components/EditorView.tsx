@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useI18n } from '../i18n'
 import { EditorContent, useEditor } from '@tiptap/react'
 import type { Editor } from '@tiptap/core'
 import {
@@ -50,6 +51,7 @@ interface EditorViewProps {
 }
 
 export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocument }: EditorViewProps) {
+  const { t } = useI18n()
   const [title, setTitle] = useState(doc.title)
   const [stats, setStats] = useState({ words: doc.wordCount, chars: doc.charCount, pages: 1 })
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -96,10 +98,10 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
           if (error instanceof RevisionConflictError) {
             if (!conflictNotifiedRef.current) {
               conflictNotifiedRef.current = true
-              toast('error', 'This document changed in another tab. Reload it before continuing.')
+              toast('error', t.conflictTab)
             }
           } else if (isQuotaError(error)) {
-            toast('error', 'Storage is full on this device. Remove images or free browser storage.')
+            toast('error', t.storageFull)
           }
           throw error
         }
@@ -217,7 +219,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
       chars: restored.charCount,
     }))
     schedule(restored)
-    toast('info', 'Restored unsaved changes from your last session.')
+    toast('info', t.restoredSession)
   }, [doc.id, doc.updatedAt, editor, schedule])
 
   const handleTitleChange = (nextTitle: string) => {
@@ -237,7 +239,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
         event.preventDefault()
         void flush().then((saved) => {
-          if (!saved) toast('error', 'Save failed. Try again in a moment.')
+          if (!saved) toast('error', t.saveFailed_toast)
         })
       }
     }
@@ -255,7 +257,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
       downloadBlob(blob, `${sanitizeFilename(latestDocRef.current.title, 'document')}.docx`)
     } catch (error) {
       console.error('[pword] docx export failed', error)
-      toast('error', "Couldn't export this document. Your work is saved locally.")
+      toast('error', t.exportFailed)
     }
   }
 
@@ -266,14 +268,14 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
         return
       }
       const copy = createDocument(
-        `${latestDocRef.current.title || 'Untitled document'} (copy)`,
+        `${latestDocRef.current.title || t.untitledDocument} (copy)`,
         latestDocRef.current.content,
       )
       await repository.insert(copy)
       onOpenDoc(copy)
     } catch (error) {
       console.error('[pword] duplicate failed', error)
-      toast('error', "Couldn't duplicate this document.")
+      toast('error', t.duplicateFailed)
     }
   }
 
@@ -285,7 +287,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
     } catch (error) {
       resume()
       console.error('[pword] delete failed', error)
-      toast('error', "Couldn't delete this document.")
+      toast('error', t.deleteFailed)
     }
   }
 
@@ -300,7 +302,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
       await repository.insert(imported)
       onOpenDoc(imported)
       if (result.warnings > 0) {
-        toast('info', `Imported with ${result.warnings} unsupported formatting note(s).`)
+        toast('info', t.importWarnings(result.warnings))
       }
     } catch (error) {
       console.error('[pword] import failed', error)
@@ -308,7 +310,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
         'error',
         error instanceof Error && error.name === 'DocxImportError'
           ? error.message
-          : "Couldn't open this document. The file may be corrupted or contain unsupported formatting.",
+          : t.importFailed,
       )
     }
   }
@@ -344,24 +346,24 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
                 else toast('error', 'Save failed. Stay on this document and try again.')
               })()
             }}>
-              New document
+              {t.newDocument}
             </MenuItem>
             <MenuItem icon={<FileUp className="size-4" />} onSelect={() => { close(); importInputRef.current?.click() }}>
-              Import .docx…
+              {t.importDocxMenu}
             </MenuItem>
             <MenuSeparator />
             <MenuItem icon={<Copy className="size-4" />} onSelect={() => { close(); void duplicate() }}>
-              Duplicate
+              {t.duplicateMenu}
             </MenuItem>
             <MenuItem icon={<FileDown className="size-4" />} onSelect={() => { close(); void exportToDocx() }}>
-              Export as .docx
+              {t.exportDocx}
             </MenuItem>
             <MenuItem icon={<Printer className="size-4" />} onSelect={() => { close(); printDocument() }}>
-              Print / Save as PDF
+              {t.printPdf}
             </MenuItem>
             <MenuSeparator />
             <MenuItem icon={<Trash2 className="size-4" />} danger onSelect={() => { close(); setDeleteDialogOpen(true) }}>
-              Delete document
+              {t.deleteDocument}
             </MenuItem>
           </>
         )}
@@ -382,8 +384,8 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        title="Delete this document?"
-        description={`"${title || 'Untitled document'}" will be permanently removed from this device. This cannot be undone.`}
+        title={t.deleteTitle}
+        description={t.deleteDescription(title || t.untitledDocument)}
       >
         <div className="flex justify-end gap-2">
           <button
@@ -391,7 +393,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
             onClick={() => setDeleteDialogOpen(false)}
             className="h-9 border border-line px-4 text-sm font-medium text-ink hover:bg-accent-soft"
           >
-            Cancel
+            {t.cancel}
           </button>
           <button
             type="button"
@@ -401,7 +403,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
             }}
             className="h-9 bg-danger px-4 text-sm font-medium text-white hover:opacity-90 dark:text-black"
           >
-            Delete
+            {t.delete}
           </button>
         </div>
       </Dialog>

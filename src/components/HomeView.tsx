@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
+import { useI18n } from '../i18n'
 import { BookOpen, Copy, FileUp, Image, MoreVertical, Music, Plus, Trash2 } from 'lucide-react'
 import { BrandMark } from './BrandMark'
 import { ThemeToggle } from './ThemeToggle'
+import { LanguageToggle } from './LanguageToggle'
 import { Dialog } from './ui/Dialog'
 import { IconButton } from './ui/IconButton'
 import { Menu, MenuItem } from './ui/Menu'
@@ -35,6 +37,7 @@ interface HomeViewProps {
 export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImport, importing }: HomeViewProps) {
   const [pendingDelete, setPendingDelete] = useState<PadDocument | null>(null)
   const importInputRef = useRef<HTMLInputElement>(null)
+  const { t } = useI18n()
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
@@ -42,7 +45,8 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
         <div className="mx-auto flex h-11 max-w-2xl items-center gap-2.5 px-4">
           <BrandMark />
           <span className="text-[15px] font-semibold tracking-tight text-ink">Pword</span>
-          <span className="ml-auto">
+          <span className="ml-auto flex items-center gap-1">
+            <LanguageToggle />
             <ThemeToggle />
           </span>
         </div>
@@ -51,13 +55,13 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-10">
         <section aria-labelledby="start-writing">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            On this device
+            {t.onThisDevice}
           </p>
           <h1 id="start-writing" className="mt-2 text-[1.75rem] font-semibold leading-tight tracking-tight text-ink">
-            Proof desk
+            {t.proofDesk}
           </h1>
           <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted">
-            Write privately. Documents stay in this browser — no account, no uploads.
+            {t.writePrivately}
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-2">
             <button
@@ -66,7 +70,7 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
               className="inline-flex h-10 items-center gap-2 bg-accent px-5 text-sm font-semibold tracking-wide text-accent-contrast transition-opacity hover:opacity-90"
             >
               <Plus className="size-4" aria-hidden="true" />
-              Start writing
+              {t.startWriting}
             </button>
             <button
               type="button"
@@ -75,7 +79,7 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
               className="inline-flex h-10 items-center gap-2 border border-line bg-transparent px-4 text-sm font-medium text-ink transition-colors hover:bg-accent-soft disabled:opacity-50"
             >
               <FileUp className="size-4" aria-hidden="true" />
-              {importing ? 'Importing…' : 'Import .docx'}
+              {importing ? t.importing : t.importDocx}
             </button>
           </div>
         </section>
@@ -83,7 +87,7 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
         <section aria-labelledby="recent-documents" className="mt-12">
           <div className="mb-0 flex items-baseline justify-between border-b border-line pb-2">
             <h2 id="recent-documents" className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted">
-              Recent galleys
+              {t.recentGalleys}
             </h2>
             <span className="font-mono text-[11px] tabular-nums text-muted">
               {docs.length}
@@ -91,7 +95,7 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
           </div>
           {docs.length === 0 ? (
             <p className="border-b border-line px-0 py-8 text-[15px] text-muted">
-              No galleys yet. Start writing — everything stays on this device.
+              {t.noGalleysYet}
             </p>
           ) : (
             <ul className="border-b border-line">
@@ -102,23 +106,23 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
                       type="button"
                       onClick={() => onOpen(doc)}
                       className="min-w-0 flex-1 text-left"
-                      aria-label={`Open ${doc.title || 'Untitled document'}`}
+                      aria-label={`Open ${doc.title || t.untitledDocument}`}
                     >
                       <span className="block truncate text-[15px] font-medium text-ink">
-                        {doc.title || 'Untitled document'}
+                        {doc.title || t.untitledDocument}
                       </span>
                       <span className="mt-0.5 block font-mono text-[11px] tabular-nums tracking-wide text-muted">
-                        {formatDate(doc.updatedAt)}
+                        {formatDate(doc.updatedAt, t)}
                         <span aria-hidden="true"> · </span>
-                        {doc.wordCount.toLocaleString()} {doc.wordCount === 1 ? 'word' : 'words'}
+                        {doc.wordCount.toLocaleString()} {doc.wordCount === 1 ? t.wordSingular : t.wordPlural}
                       </span>
                     </button>
                     <Menu
-                      label={`Actions for ${doc.title || 'Untitled document'}`}
+                      label={`Actions for ${doc.title || t.untitledDocument}`}
                       align="end"
                       trigger={({ toggle, open }) => (
                         <IconButton
-                          label={`Actions for ${doc.title || 'Untitled document'}`}
+                          label={`Actions for ${doc.title || t.untitledDocument}`}
                           onClick={toggle}
                           aria-haspopup="menu"
                           aria-expanded={open}
@@ -130,10 +134,10 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
                       {(close) => (
                         <>
                           <MenuItem icon={<Copy className="size-4" />} onSelect={() => { close(); onDuplicate(doc) }}>
-                            Duplicate
+                            {t.duplicate}
                           </MenuItem>
                           <MenuItem icon={<Trash2 className="size-4" />} danger onSelect={() => { close(); setPendingDelete(doc) }}>
-                            Delete
+                            {t.delete}
                           </MenuItem>
                         </>
                       )}
@@ -149,7 +153,7 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
       <footer className="no-print border-t border-line bg-surface">
         <div className="mx-auto flex max-w-2xl flex-col gap-2 px-4 py-4 text-muted sm:flex-row sm:items-center sm:justify-between">
           <p className="flex flex-wrap items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em]">
-            <span className="normal-case tracking-normal text-muted">Padros</span>
+            <span className="normal-case tracking-normal text-muted">{t.padros}</span>
             <FooterAppLink
               href="https://pmusic.alihankarakus.com"
               label="Pmusic"
@@ -168,15 +172,15 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
               icon={<BookOpen className="size-3.5" aria-hidden="true" />}
             />
           </p>
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em]">Stored locally · AGPL-3.0</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.08em]">{t.storedLocally} · {t.agpl}</p>
         </div>
       </footer>
 
       <Dialog
         open={pendingDelete !== null}
         onClose={() => setPendingDelete(null)}
-        title="Delete this document?"
-        description={`"${pendingDelete?.title || 'Untitled document'}" will be permanently removed from this device. This cannot be undone.`}
+        title={t.deleteTitle}
+        description={t.deleteDescription(pendingDelete?.title || t.untitledDocument)}
       >
         <div className="flex justify-end gap-2">
           <button
@@ -184,7 +188,7 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
             onClick={() => setPendingDelete(null)}
             className="h-9 border border-line px-4 text-sm font-medium text-ink hover:bg-accent-soft"
           >
-            Cancel
+            {t.cancel}
           </button>
           <button
             type="button"
@@ -194,7 +198,7 @@ export function HomeView({ docs, onCreate, onOpen, onDuplicate, onDelete, onImpo
             }}
             className="h-9 bg-danger px-4 text-sm font-medium text-white hover:opacity-90 dark:text-black"
           >
-            Delete
+            {t.delete}
           </button>
         </div>
       </Dialog>

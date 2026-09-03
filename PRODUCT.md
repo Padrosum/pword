@@ -63,7 +63,8 @@ Documents never leave the device: storage is local IndexedDB, the app is a stati
 ## Evidence on Hand
 
 - Live product: https://pword.alihankarakus.com
-- Screenshots: `docs/screenshots/` (home, editor light/dark)
+- Screenshots: `docs/screenshots/` (home empty + with galleys, editor light/dark)
+- Brand raster for GitHub: `docs/logo.png` (sage registration-mark tile)
 - README: `README.md`, `README.tr.md`
 - App source: `src/` (React 19 + Vite + TipTap + IndexedDB)
 - Do not fabricate testimonials, user counts, benchmarks, or third-party endorsements
