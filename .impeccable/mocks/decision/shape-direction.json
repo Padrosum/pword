@@ -1,0 +1,160 @@
+{
+  "title": "Pword visual world — Home + Editor",
+  "question": "Desk-first Operate redesign. Roll key d9380516. Degraded note: full challenger catalog reached the API; fuse judgments are below. Pick a world, re-roll, or take the category standard.",
+  "steer": true,
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "buildPath": { "value": "code", "toggle": true },
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Galley Proof Desk",
+      "kicker": "THE ROLL",
+      "lineage": "print-shop galley proofs on a working desk",
+      "thesis": "Pword is a proof desk: Home is a short stack of galleys; the Editor is the active proof on the board — write, mark, leave.",
+      "palette": ["#F4F1EA", "#1A1A18", "#5C6B5A", "#C4B8A5", "#8B3A2F"],
+      "materials": ["uncoated proof stock", "graphite margin marks", "hairline rules", "steel desk edge"],
+      "viewport": "Home: quiet list as stacked galley slips + one Start writing action. Editor: A4 sheets as proof pages; slim tool rail as proof marks, not a Word ribbon.",
+      "risk": "Can slide into cream-paper cliché if the proof language is soft instead of editorial and exact.",
+      "raised": [
+        {
+          "from": "challenger-miura",
+          "raise": "Deploy discipline: one clear gesture from compact Home into the full writing field — no decorative half-states."
+        },
+        {
+          "from": "challenger-annual",
+          "raise": "Registration furniture: precise hairlines, mono metadata, one grotesque for UI — printed, not soft-brand."
+        },
+        {
+          "from": "challenger-shelf",
+          "raise": "Focus dimming: while writing, chrome yields; the active page owns brightness and attention."
+        },
+        {
+          "from": "challenger-cracktro",
+          "raise": "Depth without boxes: hierarchy from layering and type, not card shells everywhere."
+        },
+        {
+          "from": "challenger-phosphor",
+          "raise": "State as quiet language: save/error/quota speak in the status line like proof notes, not toast theater."
+        }
+      ],
+      "wireframe": {
+        "regions": [
+          { "id": "brand", "label": "Pword", "x": 4, "y": 4, "w": 20, "h": 6 },
+          { "id": "cta", "label": "Start writing", "x": 4, "y": 18, "w": 28, "h": 8 },
+          { "id": "list", "label": "Recent galleys", "x": 4, "y": 32, "w": 56, "h": 58 },
+          { "id": "aside", "label": "Privacy note", "x": 64, "y": 32, "w": 32, "h": 24 }
+        ]
+      }
+    },
+    {
+      "id": "model-pick",
+      "label": "Typewriter Platen",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "mechanical typewriter + paper stack",
+      "thesis": "The product is a writing machine: Home is the paper stack beside it; Editor is the platen with the sheet locked in.",
+      "palette": ["#2B241C", "#E8DFD0", "#C45C26", "#6E6558", "#11100E"],
+      "materials": ["enameled machine body", "rubber platen", "cotton bond paper", "ink ribbon black-red"],
+      "viewport": "Home: machine silhouette + paper stack list. Editor: sheet held in a platen frame; toolbar as machine levers — sparse, tactile, high contrast.",
+      "risk": "Most familiar writing metaphor in this category — can feel costume if chrome becomes novelty keys.",
+      "wireframe": {
+        "regions": [
+          { "id": "machine", "label": "Machine chrome", "x": 8, "y": 8, "w": 84, "h": 14 },
+          { "id": "platen", "label": "Active sheet", "x": 18, "y": 28, "w": 64, "h": 62 },
+          { "id": "stack", "label": "Paper stack", "x": 84, "y": 28, "w": 12, "h": 40 }
+        ]
+      }
+    },
+    {
+      "id": "challenger-miura",
+      "label": "Deployable Sheet",
+      "verdict": "competitive",
+      "lineage": "Miura-fold deployable packet",
+      "thesis": "Home is the folded packet; one pull deploys the writing field into a precise crease grid of pages.",
+      "palette": ["#FAFAF8", "#111111", "#C9A227", "#D9E2EC"],
+      "materials": ["matte white sheet", "gold foil packet", "scored mountain/valley creases"],
+      "viewport": "Compact Home packet → Editor as fully deployed tessellated sheet with A4 cells along the crease graph.",
+      "case": "Strong audience ID with paper craft; weaker Operate clarity — fold states can obscure open/write/save.",
+      "risk": "Novelty fold UI fights desk-first calm if every transition is a performance.",
+      "hero": "https://impeccable.style/worlds/cards/paper-folds-pleats-deployable-miura-orbit-sheet-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/paper-folds-pleats-deployable-miura-orbit-sheet.webp",
+      "wireframe": {
+        "regions": [
+          { "id": "packet", "label": "Folded Home", "x": 35, "y": 35, "w": 30, "h": 30 },
+          { "id": "deploy", "label": "Deployed field", "x": 8, "y": 8, "w": 84, "h": 84 }
+        ]
+      }
+    },
+    {
+      "id": "challenger-annual",
+      "label": "Design Annual Plates",
+      "verdict": "competitive",
+      "lineage": "design annual plate section",
+      "thesis": "Every screen is a plate on uncoated stock: registration marks, hairlines, one grotesque, stamp of human authorship.",
+      "palette": ["#F5F4F6", "#16181A", "#DCDDF3", "#C9C7C4"],
+      "materials": ["uncoated near-white", "registration crosses", "letterpress stamp", "1px hairlines"],
+      "viewport": "Home as 4-up plate index of documents; Editor as full plate with A4 content registered to the sheet.",
+      "case": "Wins craft clarity as an interface language; loses audience ID vs student/writer desk rituals.",
+      "risk": "Can feel like a portfolio site rather than a daily writing tool.",
+      "hero": "https://impeccable.style/worlds/cards/design-annual-s-plate-section-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/design-annual-s-plate-section.webp",
+      "wireframe": {
+        "regions": [
+          { "id": "bar", "label": "Mono token bar", "x": 0, "y": 0, "w": 100, "h": 8 },
+          { "id": "plates", "label": "Document plates", "x": 8, "y": 16, "w": 84, "h": 72 }
+        ]
+      }
+    },
+    {
+      "id": "challenger-shelf",
+      "label": "Title-Card Wall",
+      "verdict": "declined",
+      "lineage": "streaming catalog wall",
+      "case": "Fuses poorly for desk-first: poster browsing fights write-now. Home would become the product.",
+      "kept": "Focus dimming — neighbors yield to the active item.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-streaming-title-card-wall-hero.webp"
+    },
+    {
+      "id": "challenger-cracktro",
+      "label": "Cracktro Queue",
+      "verdict": "declined",
+      "lineage": "cracktro scroller on black void",
+      "case": "Audience mismatch (demoscene) and no-box void fights A4 paper task clarity.",
+      "kept": "Depth-as-rank without card shells.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue-hero.webp"
+    },
+    {
+      "id": "challenger-phosphor",
+      "label": "Phosphor Terminal",
+      "verdict": "declined",
+      "lineage": "green-phosphor midnight terminal",
+      "case": "Reads as coding IDE, not a writing desk; paper pagination becomes alien.",
+      "kept": "Keyboard-first state spoken in the transcript/status line.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-phosphor-terminal-midnight-hero.webp"
+    },
+    {
+      "id": "challenger-quarry",
+      "label": "Cloud Quarry",
+      "verdict": "declined",
+      "lineage": "impossible cloud quarry",
+      "case": "Surreal construction obscures private writing jobs on both axes.",
+      "kept": "Sectional air — deep gaps between chrome strata and the page.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-cloud-quarry-hero.webp"
+    }
+  ],
+  "canonCard": {
+    "label": "Calm local doc editor",
+    "thesis": "What Notion-lite / Docs-adjacent tools ship: clean shell, paper or canvas, restrained accent — executed at full craft.",
+    "palette": ["#FFFFFF", "#111827", "#4F46E5", "#F3F4F6"],
+    "materials": ["flat UI chrome", "soft shadow paper", "system sans"],
+    "viewport": "Top bar + toolbar + centered page; Home as simple recent list.",
+    "risk": "Indistinguishable from category defaults by design — the standing exit.",
+    "wireframe": {
+      "regions": [
+        { "id": "top", "label": "Top bar", "x": 0, "y": 0, "w": 100, "h": 8 },
+        { "id": "tools", "label": "Toolbar", "x": 0, "y": 8, "w": 100, "h": 8 },
+        { "id": "page", "label": "Page", "x": 22, "y": 22, "w": 56, "h": 70 }
+      ]
+    }
+  }
+}

@@ -4,19 +4,25 @@ import type { PadDocument, SaveState } from '../types/document'
 
 export { lifecycleFlush } from '../lib/lifecyclePersist'
 
+/** Snapshot ready to persist, or a getter resolved only when a write runs. */
+export type AutosaveInput = PadDocument | (() => PadDocument)
+
 /**
  * Debounced, serialized autosave for a document.
  *
  * The latest snapshot is retained until persistence succeeds. This makes a
  * failed save retryable and prevents an unmount from racing a destructive
  * operation such as document deletion.
+ *
+ * Pass a getter from the editor hot path so `getJSON()` only runs when the
+ * debounce timer fires (or on flush / pagehide), not on every keystroke.
  */
 export function useAutosave(
   persist: (doc: PadDocument) => Promise<void>,
   waitMs = 900,
 ): {
   state: SaveState
-  schedule: (doc: PadDocument) => void
+  schedule: (input: AutosaveInput) => void
   flush: () => Promise<boolean>
   pauseAndDiscard: () => Promise<void>
   resume: () => void
@@ -25,6 +31,7 @@ export function useAutosave(
   const stateRef = useRef<SaveState>('saved')
   const persistRef = useRef(persist)
   const pendingRef = useRef<PadDocument | null>(null)
+  const pendingGetterRef = useRef<(() => PadDocument) | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const runningRef = useRef<Promise<void> | null>(null)
   const aliveRef = useRef(true)
@@ -42,24 +49,57 @@ export function useAutosave(
     if (aliveRef.current) setState(next)
   }, [])
 
+  const takePending = useCallback((): PadDocument | null => {
+    const getter = pendingGetterRef.current
+    if (getter) {
+      pendingGetterRef.current = null
+      try {
+        const doc = getter()
+        pendingRef.current = null
+        return doc
+      } catch (error) {
+        console.error('[pword] autosave snapshot failed', error)
+        return pendingRef.current
+      }
+    }
+    const doc = pendingRef.current
+    pendingRef.current = null
+    return doc
+  }, [])
+
+  const peekPending = useCallback((): PadDocument | null => {
+    if (pendingGetterRef.current) {
+      try {
+        return pendingGetterRef.current()
+      } catch (error) {
+        console.error('[pword] autosave snapshot failed', error)
+        return pendingRef.current
+      }
+    }
+    return pendingRef.current
+  }, [])
+
   const drain = useCallback(async function drainWork(): Promise<void> {
     if (runningRef.current) {
       await runningRef.current
-      if (pendingRef.current) await drainWork()
+      if (pendingRef.current || pendingGetterRef.current) await drainWork()
       return
     }
 
     const work = (async () => {
-      while (pendingRef.current) {
-        const doc = pendingRef.current
-        pendingRef.current = null
+      while (pendingRef.current || pendingGetterRef.current) {
+        const doc = takePending()
+        if (!doc) break
         setStateIfAlive('saving')
         try {
           await persistRef.current(doc)
-          setStateIfAlive(pendingRef.current ? 'unsaved' : 'saved')
+          setStateIfAlive(
+            pendingRef.current || pendingGetterRef.current ? 'unsaved' : 'saved',
+          )
         } catch (error) {
           // Keep the failed snapshot so a later edit or explicit flush can retry it.
           pendingRef.current = pendingRef.current ?? doc
+          pendingGetterRef.current = null
           console.error('[pword] autosave failed', error)
           setStateIfAlive('error')
           break
@@ -73,11 +113,17 @@ export function useAutosave(
     } finally {
       runningRef.current = null
     }
-  }, [setStateIfAlive])
+  }, [setStateIfAlive, takePending])
 
   const schedule = useCallback(
-    (doc: PadDocument) => {
-      pendingRef.current = doc
+    (input: AutosaveInput) => {
+      if (typeof input === 'function') {
+        pendingGetterRef.current = input
+        pendingRef.current = null
+      } else {
+        pendingRef.current = input
+        pendingGetterRef.current = null
+      }
       setStateIfAlive('unsaved')
       if (timerRef.current !== null) clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => {
@@ -94,7 +140,12 @@ export function useAutosave(
       timerRef.current = null
     }
     const finished = drain()
-    return finished.then(() => pendingRef.current === null && runningRef.current === null)
+    return finished.then(
+      () =>
+        pendingRef.current === null &&
+        pendingGetterRef.current === null &&
+        runningRef.current === null,
+    )
   }, [drain])
 
   // Stop scheduling new writes, wait for an already-running write, and discard
@@ -106,8 +157,10 @@ export function useAutosave(
       timerRef.current = null
     }
     pendingRef.current = null
+    pendingGetterRef.current = null
     if (runningRef.current) await runningRef.current
     pendingRef.current = null
+    pendingGetterRef.current = null
   }, [])
 
   const resume = useCallback(() => {
@@ -117,13 +170,15 @@ export function useAutosave(
   useEffect(() => {
     const hasPendingSave = () =>
       pendingRef.current !== null ||
+      pendingGetterRef.current !== null ||
       timerRef.current !== null ||
       stateRef.current === 'unsaved' ||
       stateRef.current === 'saving' ||
       stateRef.current === 'error'
 
     const runLifecycleSave = () => {
-      if (pendingRef.current) stashPendingSave(pendingRef.current)
+      const snapshot = peekPending()
+      if (snapshot) stashPendingSave(snapshot)
       void lifecycleFlush(flush)
     }
 
@@ -153,7 +208,7 @@ export function useAutosave(
       timerRef.current = null
       if (flushOnCleanupRef.current) void flush()
     }
-  }, [flush])
+  }, [flush, peekPending])
 
   return { state, schedule, flush, pauseAndDiscard, resume }
 }

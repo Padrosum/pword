@@ -72,7 +72,7 @@ export function Dialog({ open, onClose, title, description, children }: DialogPr
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className="w-full max-w-md rounded-xl border border-line bg-surface p-5 shadow-[0_16px_48px_rgba(20,15,5,0.2)]"
+        className="w-full max-w-md border border-line bg-surface p-5 shadow-[0_12px_40px_rgba(26,26,24,0.18)]"
       >
         <div className="mb-1 flex items-start justify-between gap-4">
           <h2 id={titleId} className="text-base font-semibold text-ink">

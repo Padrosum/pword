@@ -16,7 +16,7 @@ export function IconButton({ label, active, className, children, ...rest }: Icon
       title={label}
       aria-pressed={active === undefined ? undefined : active}
       className={cn(
-        'inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted transition-colors',
+        'inline-flex size-8 shrink-0 items-center justify-center text-muted transition-colors',
         'hover:bg-accent-soft hover:text-ink',
         'disabled:pointer-events-none disabled:opacity-40',
         active && 'bg-accent-soft text-accent',

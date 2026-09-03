@@ -12,59 +12,61 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Galley Proof Desk — uncoated stock, hairlines, sage registration accent */
 :root {
-  --app-bg: #f5f3ef;
-  --app-surface: #ffffff;
-  --app-ink: #26221c;
-  --app-muted: #75705f;
-  --app-border: #e5e1d7;
-  --app-border-strong: #d4cfc2;
-  --app-accent: #6d28d9;
-  --app-accent-contrast: #ffffff;
-  --app-accent-soft: rgba(109, 40, 217, 0.09);
-  --app-danger: #b3261e;
-  --page-bg: #ffffff;
-  --page-ink: #26231e;
-  --page-border: #e7e3d9;
-  --page-shadow: 0 1px 2px rgba(35, 30, 20, 0.05), 0 8px 28px rgba(35, 30, 20, 0.07);
-  --page-selected: rgba(109, 40, 217, 0.14);
-  --page-highlight: #fde68a;
-  --page-placeholder: #a39d90;
-  --page-edge: rgba(64, 54, 32, 0.16);
+  --app-bg: #e4e2da;
+  --app-surface: #f2f0e9;
+  --app-ink: #1a1a18;
+  --app-muted: #5a564e;
+  --app-border: #bdb7ab;
+  --app-border-strong: #9e9789;
+  --app-accent: #3f5244;
+  --app-accent-contrast: #f2f0e9;
+  --app-accent-soft: rgba(63, 82, 68, 0.1);
+  --app-danger: #8b3a2f;
+  --page-bg: #faf9f4;
+  --page-ink: #1a1a18;
+  --page-border: #c9c4b8;
+  --page-shadow: 0 1px 0 rgba(26, 26, 24, 0.06), 0 10px 28px rgba(26, 26, 24, 0.08);
+  --page-selected: rgba(63, 82, 68, 0.16);
+  --page-highlight: #e4d39a;
+  --page-placeholder: #8a857a;
+  --page-edge: rgba(26, 26, 24, 0.22);
   --sheet-h: 29.7cm;
   --sheet-gap: 0.8cm;
   --sheet-stride: calc(var(--sheet-h) + var(--sheet-gap));
   --page-margin-v: 2.4cm;
+  --chrome-dim: 1;
   color-scheme: light;
 }
 
 .dark {
-  --app-bg: #141317;
-  --app-surface: #1d1c22;
-  --app-ink: #ecebe6;
-  --app-muted: #99948a;
-  --app-border: #2c2a31;
-  --app-border-strong: #3b3941;
-  --app-accent: #a78bfa;
-  --app-accent-contrast: #221a35;
-  --app-accent-soft: rgba(167, 139, 250, 0.14);
-  --app-danger: #f2b8b5;
-  /* The page stays paper-like in dark mode for comfortable writing. */
-  --page-bg: #f7f5f0;
-  --page-ink: #29261f;
-  --page-border: #35333a;
-  --page-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 32px rgba(0, 0, 0, 0.35);
-  --page-selected: rgba(150, 110, 240, 0.28);
-  --page-highlight: #e9c46a;
-  --page-placeholder: #9a948a;
-  --page-edge: rgba(0, 0, 0, 0.45);
+  --app-bg: #141512;
+  --app-surface: #1c1d19;
+  --app-ink: #e8e6df;
+  --app-muted: #9a958a;
+  --app-border: #34362f;
+  --app-border-strong: #4a4d43;
+  --app-accent: #8fa394;
+  --app-accent-contrast: #141512;
+  --app-accent-soft: rgba(143, 163, 148, 0.14);
+  --app-danger: #e0a399;
+  /* Proof sheet stays paper-like for comfortable writing. */
+  --page-bg: #faf9f4;
+  --page-ink: #1a1a18;
+  --page-border: #34362f;
+  --page-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.4);
+  --page-selected: rgba(143, 163, 148, 0.28);
+  --page-highlight: #d4c07a;
+  --page-placeholder: #8a857a;
+  --page-edge: rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
 
 @theme inline {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
-  --font-mono: ui-monospace, 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --font-sans: 'Source Sans 3 Variable', 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Source Serif 4 Variable', 'Literata Variable', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono Variable', ui-monospace, Menlo, Consolas, monospace;
 
   --color-canvas: var(--app-bg);
   --color-surface: var(--app-surface);
@@ -95,17 +97,28 @@ body {
   color: var(--app-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 :focus-visible {
-  outline: 2px solid var(--app-accent);
+  outline: 1px solid var(--app-accent);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 ::selection {
   background: var(--page-selected);
+}
+
+/* Proof-desk chrome: square corners, hairline language */
+.galley-hairline {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--app-border);
+}
+
+.galley-rail {
+  opacity: var(--chrome-dim, 1);
+  transition: opacity 180ms ease-out;
 }
 
 /* Native select dropdowns must follow the active theme in both modes. */
@@ -204,19 +217,23 @@ select optgroup {
   min-height: 24.8cm;
   display: flow-root;
   word-wrap: break-word;
+  text-rendering: auto;
+}
+
+/* Skip paint/layout for off-screen blocks. Intrinsic sizes are kept in sync
+   by the pagination plugin after each measure so scroll position stays stable. */
+.ProseMirror > *:not([data-page-spacer]) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1.6em;
 }
 
 .ProseMirror p {
   margin-block: 0.4em;
 }
 
-/* Collapsed by the pagination plugin for empty TipTap paragraphs. */
-.ProseMirror p.page-empty-para,
-.ProseMirror p:not(.is-editor-empty):where(
-  :empty,
-  :has(> br:only-child),
-  :has(> br.ProseMirror-trailingBreak:only-child)
-) {
+/* Collapsed by the pagination plugin for empty TipTap paragraphs.
+   Prefer the class over :has() — :has() rechecks every paragraph on layout. */
+.ProseMirror p.page-empty-para {
   margin: 0 !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -225,12 +242,7 @@ select optgroup {
   padding: 0;
 }
 
-.ProseMirror p.page-empty-para::before,
-.ProseMirror p:not(.is-editor-empty):where(
-  :empty,
-  :has(> br:only-child),
-  :has(> br.ProseMirror-trailingBreak:only-child)
-)::before {
+.ProseMirror p.page-empty-para::before {
   display: none;
 }
 

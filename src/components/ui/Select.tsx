@@ -20,7 +20,7 @@ export function Select({ label, value, onChange, children, className }: SelectPr
   return (
     <span
       className={cn(
-        'relative inline-flex h-7 items-center rounded-md border border-line bg-surface',
+        'relative inline-flex h-7 items-center border border-line bg-surface',
         'transition-colors focus-within:border-accent hover:border-line-strong',
         className,
       )}

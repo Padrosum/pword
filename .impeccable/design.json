@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-03T12:42:00.000Z",
+  "title": "Design System: Pword",
+  "extensions": {
+    "colorMeta": {
+      "proof-ground": {
+        "role": "neutral",
+        "displayName": "Proof Ground",
+        "canonical": "#e4e2da",
+        "tonalRamp": ["#2a2824", "#45423c", "#635f56", "#827c71", "#a19a8c", "#c0b8a8", "#e4e2da", "#f5f3ec"]
+      },
+      "sheet-stock": {
+        "role": "neutral",
+        "displayName": "Sheet Stock",
+        "canonical": "#f2f0e9",
+        "tonalRamp": ["#2c2a26", "#48453e", "#68635a", "#888277", "#a8a196", "#c9c2b5", "#e4e0d4", "#f2f0e9"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1a1a18",
+        "tonalRamp": ["#1a1a18", "#333330", "#4d4d48", "#666661", "#80807a", "#999993", "#b3b3ab", "#e8e6df"]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#5a564e",
+        "tonalRamp": ["#2e2c28", "#45423c", "#5a564e", "#736e64", "#8c867a", "#a59e90", "#beb6a6", "#d7cebc"]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#bdb7ab",
+        "tonalRamp": ["#3a3732", "#56524a", "#726d62", "#8e887a", "#a9a292", "#bdb7ab", "#d4cfc3", "#ebe7dc"]
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "canonical": "#9e9789",
+        "tonalRamp": ["#322f2a", "#4c4840", "#666156", "#807a6c", "#9e9789", "#b5ae9f", "#ccc5b5", "#e3dccb"]
+      },
+      "sage": {
+        "role": "primary",
+        "displayName": "Sage Registration",
+        "canonical": "#3f5244",
+        "tonalRamp": ["#1a221c", "#2a372e", "#3f5244", "#556b5a", "#6f8574", "#8fa394", "#b3c2b6", "#d7e0d9"]
+      },
+      "sage-contrast": {
+        "role": "neutral",
+        "displayName": "Sage Contrast",
+        "canonical": "#f2f0e9",
+        "tonalRamp": ["#2c2a26", "#48453e", "#68635a", "#888277", "#a8a196", "#c9c2b5", "#e4e0d4", "#f2f0e9"]
+      },
+      "sage-soft": {
+        "role": "primary",
+        "displayName": "Sage Soft",
+        "canonical": "rgba(63, 82, 68, 0.1)",
+        "tonalRamp": ["rgba(63,82,68,0.35)", "rgba(63,82,68,0.28)", "rgba(63,82,68,0.22)", "rgba(63,82,68,0.16)", "rgba(63,82,68,0.12)", "rgba(63,82,68,0.1)", "rgba(63,82,68,0.06)", "rgba(63,82,68,0.03)"]
+      },
+      "danger": {
+        "role": "primary",
+        "displayName": "Danger Oxide",
+        "canonical": "#8b3a2f",
+        "tonalRamp": ["#3a1814", "#5c261f", "#8b3a2f", "#a84d40", "#c46a5c", "#e0a399", "#ecc4bc", "#f6e2de"]
+      },
+      "page-paper": {
+        "role": "neutral",
+        "displayName": "Page Paper",
+        "canonical": "#faf9f4",
+        "tonalRamp": ["#2e2c28", "#4a4740", "#6b665c", "#8c867a", "#ada79a", "#cec8b9", "#e8e4d8", "#faf9f4"]
+      },
+      "page-highlight": {
+        "role": "secondary",
+        "displayName": "Proof Highlight",
+        "canonical": "#e4d39a",
+        "tonalRamp": ["#4a3f1c", "#6e5c2a", "#927a38", "#b6984c", "#d0b66e", "#e4d39a", "#efe4c0", "#f7f1df"]
+      },
+      "page-placeholder": {
+        "role": "neutral",
+        "displayName": "Page Placeholder",
+        "canonical": "#8a857a",
+        "tonalRamp": ["#2e2c28", "#45423c", "#5f5b52", "#8a857a", "#a39e91", "#bcb7a8", "#d5d0bf", "#eee9d6"]
+      },
+      "page-edge": {
+        "role": "neutral",
+        "displayName": "Page Edge",
+        "canonical": "rgba(26, 26, 24, 0.22)",
+        "tonalRamp": ["rgba(26,26,24,0.5)", "rgba(26,26,24,0.4)", "rgba(26,26,24,0.32)", "rgba(26,26,24,0.22)", "rgba(26,26,24,0.16)", "rgba(26,26,24,0.1)", "rgba(26,26,24,0.06)", "rgba(26,26,24,0.03)"]
+      }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Home Proof desk title and primary UI headings." },
+      "title": { "displayName": "Title", "purpose": "Product name, list titles, dialog titles." },
+      "body": { "displayName": "UI Body", "purpose": "Supporting chrome copy outside the proof." },
+      "page-body": { "displayName": "Page Body", "purpose": "Serif document content on A4 sheets only." },
+      "label": { "displayName": "Mono Label", "purpose": "Uppercase metadata: sections, dates, stats, Local, save state." }
+    },
+    "shadows": [
+      {
+        "name": "page",
+        "value": "0 1px 0 rgba(26, 26, 24, 0.06), 0 10px 28px rgba(26, 26, 24, 0.08)",
+        "purpose": "Soft lift for A4 proof sheets on the desk."
+      },
+      {
+        "name": "dialog",
+        "value": "0 12px 40px rgba(26, 26, 24, 0.18)",
+        "purpose": "Modal panel over dimmed scrim."
+      },
+      {
+        "name": "toast",
+        "value": "0 8px 24px rgba(26, 26, 24, 0.14)",
+        "purpose": "Transient toast chips above the canvas."
+      }
+    ],
+    "motion": [
+      {
+        "name": "chrome-dim",
+        "value": "opacity 180ms ease-out",
+        "purpose": "Editor focus dims .galley-rail via --chrome-dim (1 → 0.72)."
+      },
+      {
+        "name": "caret-blink",
+        "value": "caret-blink 1.06s step-end infinite",
+        "purpose": "Optional type-caret utility blink on sage fill."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition 0.01ms",
+        "purpose": "prefers-reduced-motion collapses durations."
+      }
+    ],
+    "breakpoints": [
+      { "name": "editor-page-fluid", "value": "899.98px" },
+      { "name": "sm", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Sage fill CTA for Start writing and confirm actions.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Start writing</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; height: 40px; padding: 0 20px; background: var(--app-accent, #3f5244); color: var(--app-accent-contrast, #f2f0e9); border: none; border-radius: 0; font-family: 'Source Sans 3 Variable', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.025em; cursor: pointer; transition: opacity 150ms ease; } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:focus-visible { outline: 1px solid var(--app-accent, #3f5244); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Hairline ghost button for Import and Cancel.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Import .docx</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; background: transparent; color: var(--app-ink, #1a1a18); border: 1px solid var(--app-border, #bdb7ab); border-radius: 0; font-family: 'Source Sans 3 Variable', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-secondary:hover { background: var(--app-accent-soft, rgba(63, 82, 68, 0.1)); } .ds-btn-secondary:focus-visible { outline: 1px solid var(--app-accent, #3f5244); outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive confirm only.",
+      "html": "<button class=\"ds-btn-danger\" type=\"button\">Delete</button>",
+      "css": ".ds-btn-danger { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; background: var(--app-danger, #8b3a2f); color: #fff; border: none; border-radius: 0; font-family: 'Source Sans 3 Variable', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 150ms ease; } .ds-btn-danger:hover { opacity: 0.9; } .ds-btn-danger:focus-visible { outline: 1px solid var(--app-accent, #3f5244); outline-offset: 2px; }"
+    },
+    {
+      "name": "Icon Button",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "32px square tool control; active uses sage-soft + sage ink.",
+      "html": "<button class=\"ds-icon-btn\" type=\"button\" aria-label=\"Bold\" aria-pressed=\"false\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M6 4h8a4 4 0 0 1 0 8H6z\"/><path d=\"M6 12h9a4 4 0 0 1 0 8H6z\"/></svg></button>",
+      "css": ".ds-icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; background: transparent; color: var(--app-muted, #5a564e); border: none; border-radius: 0; cursor: pointer; transition: background-color 150ms ease, color 150ms ease; } .ds-icon-btn:hover { background: var(--app-accent-soft, rgba(63, 82, 68, 0.1)); color: var(--app-ink, #1a1a18); } .ds-icon-btn[aria-pressed=\"true\"] { background: var(--app-accent-soft, rgba(63, 82, 68, 0.1)); color: var(--app-accent, #3f5244); } .ds-icon-btn:focus-visible { outline: 1px solid var(--app-accent, #3f5244); outline-offset: 2px; } .ds-icon-btn:disabled { opacity: 0.4; pointer-events: none; }"
+    },
+    {
+      "name": "Select Field",
+      "kind": "input",
+      "refersTo": "select-field",
+      "description": "Square hairline native select used in the tool rail.",
+      "html": "<label class=\"ds-select\"><span class=\"ds-select-label\">Paragraph style</span><select><option>Paragraph</option><option>Heading 1</option></select></label>",
+      "css": ".ds-select { position: relative; display: inline-flex; align-items: center; height: 28px; border: 1px solid var(--app-border, #bdb7ab); background: var(--app-surface, #f2f0e9); border-radius: 0; transition: border-color 150ms ease; } .ds-select:hover { border-color: var(--app-border-strong, #9e9789); } .ds-select:focus-within { border-color: var(--app-accent, #3f5244); } .ds-select-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .ds-select select { height: 100%; max-width: 10rem; appearance: none; border: none; background: transparent; padding: 0 24px 0 8px; font-family: 'Source Sans 3 Variable', sans-serif; font-size: 13px; color: var(--app-ink, #1a1a18); outline: none; cursor: pointer; }"
+    },
+    {
+      "name": "Dialog Panel",
+      "kind": "card",
+      "refersTo": "dialog-panel",
+      "description": "Square modal on sheet stock with soft shadow.",
+      "html": "<div class=\"ds-dialog\" role=\"dialog\" aria-labelledby=\"ds-dialog-title\"><h2 id=\"ds-dialog-title\">Delete this document?</h2><p>This cannot be undone.</p><div class=\"ds-dialog-actions\"><button class=\"ds-btn-secondary\" type=\"button\">Cancel</button><button class=\"ds-btn-danger\" type=\"button\">Delete</button></div></div>",
+      "css": ".ds-dialog { width: 100%; max-width: 28rem; background: var(--app-surface, #f2f0e9); color: var(--app-ink, #1a1a18); border: 1px solid var(--app-border, #bdb7ab); border-radius: 0; padding: 20px; box-shadow: 0 12px 40px rgba(26, 26, 24, 0.18); font-family: 'Source Sans 3 Variable', sans-serif; } .ds-dialog h2 { margin: 0; font-size: 16px; font-weight: 600; } .ds-dialog p { margin: 8px 0 16px; font-size: 14px; color: var(--app-muted, #5a564e); } .ds-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; } .ds-btn-secondary { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; background: transparent; color: var(--app-ink, #1a1a18); border: 1px solid var(--app-border, #bdb7ab); border-radius: 0; font-size: 14px; font-weight: 500; cursor: pointer; } .ds-btn-secondary:hover { background: var(--app-accent-soft, rgba(63, 82, 68, 0.1)); } .ds-btn-danger { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; background: var(--app-danger, #8b3a2f); color: #fff; border: none; border-radius: 0; font-size: 14px; font-weight: 500; cursor: pointer; } .ds-btn-danger:hover { opacity: 0.9; }"
+    },
+    {
+      "name": "Menu Panel",
+      "kind": "nav",
+      "refersTo": "menu-panel",
+      "description": "Portaled hairline dropdown for document and list actions.",
+      "html": "<div class=\"ds-menu\" role=\"menu\"><button class=\"ds-menu-item\" role=\"menuitem\" type=\"button\">Duplicate</button><button class=\"ds-menu-item ds-menu-item-danger\" role=\"menuitem\" type=\"button\">Delete</button></div>",
+      "css": ".ds-menu { min-width: 11rem; padding: 4px 0; background: var(--app-surface, #f2f0e9); border: 1px solid var(--app-border, #bdb7ab); border-radius: 0; font-family: 'Source Sans 3 Variable', sans-serif; } .ds-menu-item { display: flex; width: 100%; align-items: center; gap: 8px; padding: 8px 12px; background: transparent; border: none; color: var(--app-ink, #1a1a18); font-size: 14px; text-align: left; cursor: pointer; } .ds-menu-item:hover, .ds-menu-item:focus-visible { background: var(--app-accent-soft, rgba(63, 82, 68, 0.1)); outline: none; } .ds-menu-item-danger { color: var(--app-danger, #8b3a2f); }"
+    },
+    {
+      "name": "Galley List Row",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Ruled recent-galley row — title + mono meta, no card chrome.",
+      "html": "<div class=\"ds-galley\"><div class=\"ds-galley-head\"><span>Recent galleys</span><span>3</span></div><button class=\"ds-galley-row\" type=\"button\"><span class=\"ds-galley-title\">Untitled document</span><span class=\"ds-galley-meta\">Today · 248 words</span></button></div>",
+      "css": ".ds-galley { font-family: 'Source Sans 3 Variable', sans-serif; color: var(--app-ink, #1a1a18); } .ds-galley-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--app-border, #bdb7ab); padding-bottom: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--app-muted, #5a564e); } .ds-galley-row { display: block; width: 100%; padding: 12px 0; border: none; border-bottom: 1px solid var(--app-border, #bdb7ab); background: transparent; text-align: left; cursor: pointer; transition: background-color 150ms ease; } .ds-galley-row:hover { background: var(--app-accent-soft, rgba(63, 82, 68, 0.1)); } .ds-galley-row:focus-visible { outline: 1px solid var(--app-accent, #3f5244); outline-offset: 2px; } .ds-galley-title { display: block; font-size: 15px; font-weight: 500; } .ds-galley-meta { display: block; margin-top: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.025em; color: var(--app-muted, #5a564e); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Status Bar",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Mono editor footer: words · chars · pages · Local.",
+      "html": "<footer class=\"ds-status\"><p>248 words · 1,402 chars · ~1 page</p><p class=\"ds-status-local\">Local</p></footer>",
+      "css": ".ds-status { display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 16px; background: var(--app-surface, #f2f0e9); border-top: 1px solid var(--app-border, #bdb7ab); font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--app-muted, #5a564e); } .ds-status p:first-child { text-transform: none; letter-spacing: normal; font-variant-numeric: tabular-nums; } .ds-status-local { display: inline-flex; align-items: center; gap: 6px; }"
+    },
+    {
+      "name": "Brand Mark",
+      "kind": "custom",
+      "refersTo": "icon-button",
+      "description": "Sage registration-cross tile with light P.",
+      "html": "<svg class=\"ds-brand\" viewBox=\"0 0 512 512\" aria-hidden=\"true\" width=\"24\" height=\"24\"><rect width=\"512\" height=\"512\" fill=\"#3f5244\"/><g fill=\"none\" stroke=\"#f2f0e9\" stroke-width=\"14\"><path d=\"M48 48 H120 M48 48 V120\"/><path d=\"M464 48 H392 M464 48 V120\"/><path d=\"M48 464 H120 M48 464 V392\"/><path d=\"M464 464 H392 M464 464 V392\"/></g><g transform=\"translate(-6 -2)\"><path d=\"M176 124 H240 C318 124 368 170 368 236 C368 302 318 348 240 348 V396 H176 Z M240 284 C282 284 304 266 304 236 C304 206 282 188 240 188 Z\" fill=\"#f2f0e9\" fill-rule=\"evenodd\"/><rect x=\"398\" y=\"204\" width=\"44\" height=\"44\" fill=\"#f2f0e9\"/><rect x=\"403\" y=\"269\" width=\"34\" height=\"34\" fill=\"none\" stroke=\"#f2f0e9\" stroke-width=\"10\"/></g></svg>",
+      "css": ".ds-brand { display: block; width: 24px; height: 24px; border-radius: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Galley Proof Desk",
+    "overview": "Pword is a private local writing tool rendered as a proof desk, not a marketing landing page and not a Word clone. Home is a short stack of galleys on uncoated stock; the Editor is the active proof — slim chrome around real A4 sheets. The room stays quiet: hairline borders, square corners, sage used sparingly as registration ink, and mono metadata for dates, counts, and locality.\n\nDepth comes from paper on ground and a single soft page shadow, not from card stacks or glow. When the editor is focused, chrome dims slightly so the proof stays primary. Documents never leave the device; the visual system reinforces that with a Local status mark and restrained UI.",
+    "keyCharacteristics": [
+      "Uncoated proof ground (#e4e2da / #f2f0e9) with near-black ink (#1a1a18)",
+      "Sage registration accent (#3f5244) on brand tile and rare interactive emphasis",
+      "Hairline borders, square chrome, no purple",
+      "UI grotesque (Source Sans 3) + page serif (Source Serif 4) + mono metadata (IBM Plex Mono)",
+      "A4 proof sheets that stay paper-colored even when chrome goes dark"
+    ],
+    "rules": [
+      { "name": "The One Sage Rule", "body": "Sage appears on the brand mark, primary actions, focus, and active tools — not as large fills or decorative gradients.", "section": "colors" },
+      { "name": "The Paper Stays Paper Rule", "body": "In dark theme, chrome may invert; the proof sheet remains light for writing.", "section": "colors" },
+      { "name": "The Mono Metadata Rule", "body": "Dates, word counts, save state, Local, and section labels use IBM Plex Mono — never the page serif.", "section": "typography" },
+      { "name": "The Serif-On-Paper Rule", "body": "Source Serif 4 is reserved for document content inside .ProseMirror; chrome stays sans.", "section": "typography" },
+      { "name": "The Flat Chrome Rule", "body": "Headers, rails, lists, and menus have no drop shadows — borders do the work.", "section": "elevation" },
+      { "name": "The Chrome Dim Rule", "body": "Editor focus sets --chrome-dim to 0.72 on .galley-rail (180ms ease-out); restore to 1 when focus leaves.", "section": "elevation" },
+      { "name": "The Square Chrome Rule", "body": "Buttons, inputs, dialogs, menus, and icon buttons are square. Micro radii inside page content (code chips) are content exceptions, not chrome language.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep Home as a short galley stack: brand, “On this device” / Proof desk, Start writing + Import, ruled recent list.",
+      "Do keep Editor as slim chrome + A4 proofs + mono status; dim rails while writing.",
+      "Do use sage only as registration accent and primary action ink.",
+      "Do put metadata in IBM Plex Mono and document body in Source Serif 4.",
+      "Do preserve square corners and hairline borders on chrome."
+    ],
+    "donts": [
+      "Don't introduce purple, indigo washes, or Padros-purple branding — the shipped mark is sage registration.",
+      "Don't wrap galleys or tools in elevated cards or rounded pills.",
+      "Don't turn Home into a marketing hero (stats strips, promo badges, full-bleed imagery).",
+      "Don't invert the proof sheet in dark mode; only chrome adapts.",
+      "Don't use display/marketing typography stacks; stay on Source Sans 3 / Source Serif 4 / IBM Plex Mono."
+    ]
+  }
+}

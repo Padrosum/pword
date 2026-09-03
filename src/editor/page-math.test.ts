@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { computePageBreaks, measureNaturalBlocks, type BlockMetrics } from './page-math'
+import {
+  computePageBreaks,
+  findChangedBlockRange,
+  measureNaturalBlocks,
+  measureNaturalBlocksIncremental,
+  type BlockMetrics,
+} from './page-math'
 
 // Convenience block factory: heights in "px" of a test grid where a sheet
 // has stride 1000 and capacity 800 (i.e. 200px of inter-sheet flow gap).
@@ -134,5 +140,84 @@ describe('measureNaturalBlocks', () => {
     expect(metrics[0]!.height).toBe(100)
     expect(metrics[1]!.top).toBe(112)
     expect(metrics[1]!.height).toBe(200)
+  })
+})
+
+describe('measureNaturalBlocksIncremental', () => {
+  function block(height: number, marginTop = '0px') {
+    const el = document.createElement('p')
+    el.textContent = 'x'
+    Object.defineProperty(el, 'offsetHeight', { value: height, configurable: true })
+    return { el, marginTop }
+  }
+
+  it('only remeasures the dirty block and shifts later tops', () => {
+    const a = block(100)
+    const b = block(100, '10px')
+    const c = block(100, '10px')
+    const elements = [a.el, b.el, c.el]
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => {
+      const style = { marginTop: '0px', marginBottom: '0px' } as CSSStyleDeclaration
+      if (el === b.el) style.marginTop = b.marginTop
+      if (el === c.el) style.marginTop = c.marginTop
+      return style
+    })
+
+    const cache = measureNaturalBlocks(elements, [false, false, false], [false, false, false])
+    Object.defineProperty(b.el, 'offsetHeight', { value: 150, configurable: true })
+
+    const next = measureNaturalBlocksIncremental(
+      elements,
+      [false, false, false],
+      [false, false, false],
+      cache,
+      1,
+      false,
+    )
+
+    expect(next[0]).toEqual(cache[0])
+    expect(next[1]!.height).toBe(150)
+    expect(next[1]!.top).toBe(cache[1]!.top)
+    expect(next[2]!.top).toBe(cache[2]!.top + 50)
+    expect(next[2]!.height).toBe(100)
+  })
+
+  it('remeasures the suffix after a structural insert', () => {
+    const a = block(100)
+    const b = block(80)
+    const c = block(90)
+    const elements = [a.el, b.el, c.el]
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      marginTop: '0px',
+      marginBottom: '0px',
+    } as CSSStyleDeclaration)
+
+    const cache = measureNaturalBlocks([a.el, c.el], [false, false], [false, false])
+    const next = measureNaturalBlocksIncremental(
+      elements,
+      [false, false, false],
+      [false, false, false],
+      cache,
+      1,
+      true,
+    )
+
+    expect(next).toHaveLength(3)
+    expect(next[0]).toEqual(cache[0])
+    expect(next[1]!.height).toBe(80)
+    expect(next[1]!.top).toBe(100)
+    expect(next[2]!.top).toBe(180)
+  })
+})
+
+describe('findChangedBlockRange', () => {
+  it('detects the first changed child and structural inserts', () => {
+    expect(
+      findChangedBlockRange(3, 3, (i) => i !== 2),
+    ).toEqual({ from: 2, structural: false })
+
+    expect(
+      findChangedBlockRange(3, 4, (i) => i < 3),
+    ).toEqual({ from: 3, structural: true })
   })
 })

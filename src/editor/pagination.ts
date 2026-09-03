@@ -1,8 +1,15 @@
 import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
+import type { Node as PMNode } from '@tiptap/pm/model'
 import type { EditorView as PMEditorView } from '@tiptap/pm/view'
-import { computePageBreaks, isEmptyBlockElement, measureBlocksFromDom } from './page-math'
+import {
+  computePageBreaks,
+  findChangedBlockRange,
+  isEmptyBlockElement,
+  measureNaturalBlocksIncremental,
+  type BlockMetrics,
+} from './page-math'
 
 /**
  * Real vertical pagination, the way a word processor does it: pages break
@@ -13,7 +20,9 @@ import { computePageBreaks, isEmptyBlockElement, measureBlocksFromDom } from './
  * lands exactly on the sheet grid.
  *
  * Natural geometry is derived from block heights (not offsetTop while
- * spacers are mounted) so repeated recomputes stay stable.
+ * spacers are mounted) so repeated recomputes stay stable and cheap.
+ * Long documents remeasure from the first dirty block only; off-screen
+ * blocks keep content-visibility:auto with cached intrinsic sizes.
  */
 
 const key = new PluginKey('pagePagination')
@@ -40,6 +49,11 @@ interface PaginationMeta {
   pageCount: number
 }
 
+interface DirtyRange {
+  from: number
+  structural: boolean
+}
+
 /** Reads a length CSS custom property as px via a scratch element. */
 function createVarMeasurer() {
   let el: HTMLDivElement | null = null
@@ -62,10 +76,41 @@ function collectBlockElements(dom: HTMLElement): HTMLElement[] {
   )
 }
 
-function prepareBlockElements(elements: HTMLElement[]): void {
-  for (const el of elements) {
-    if (isEmptyBlockElement(el)) el.classList.add('page-empty-para')
-    else el.classList.remove('page-empty-para')
+/** Sync empty-para CSS class from `fromIndex`; return full emptiness flags. */
+function prepareBlockElements(
+  elements: HTMLElement[],
+  fromIndex: number,
+  cache: BlockMetrics[] | null,
+): boolean[] {
+  const emptyFlags: boolean[] = new Array(elements.length)
+  for (let i = 0; i < elements.length; i += 1) {
+    if (i < fromIndex) {
+      emptyFlags[i] = (cache?.[i]?.height ?? 0) <= EPS
+      continue
+    }
+    const el = elements[i]!
+    const empty = isEmptyBlockElement(el)
+    emptyFlags[i] = empty
+    const has = el.classList.contains('page-empty-para')
+    if (empty && !has) el.classList.add('page-empty-para')
+    else if (!empty && has) el.classList.remove('page-empty-para')
+  }
+  return emptyFlags
+}
+
+/** Keep content-visibility intrinsic sizes in sync so scroll jump stays small. */
+function syncIntrinsicSizes(
+  elements: HTMLElement[],
+  metrics: BlockMetrics[],
+  fromIndex: number,
+): void {
+  for (let i = fromIndex; i < elements.length; i += 1) {
+    const el = elements[i]!
+    const height = Math.max(1, Math.ceil(metrics[i]?.height ?? 0))
+    const next = `${height}px`
+    if (el.style.containIntrinsicSize !== next) {
+      el.style.containIntrinsicSize = next
+    }
   }
 }
 
@@ -87,9 +132,9 @@ function trySplitOverflowingParagraph(
   if (node.type.name !== 'paragraph') return false
 
   const rect = element.getBoundingClientRect()
-  const topInPages = rect.top - pagesTop
   if (element.offsetHeight <= capacity + EPS) return false
 
+  const topInPages = rect.top - pagesTop
   const page = Math.max(0, Math.floor(topInPages / stride))
   const contentBottomPages = (page === 0 ? contentStartOffset : page * stride) + capacity
   const boundaryY = pagesTop + contentBottomPages
@@ -114,6 +159,14 @@ function trySplitOverflowingParagraph(
   return false
 }
 
+function mergeDirty(current: DirtyRange | null, next: DirtyRange): DirtyRange {
+  if (!current) return next
+  return {
+    from: Math.min(current.from, next.from),
+    structural: current.structural || next.structural,
+  }
+}
+
 export interface PaginationOptions {
   onPageCount?: (count: number) => void
 }
@@ -124,6 +177,11 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
   let lastMinHeight = ''
   let pagesEl: HTMLElement | null | undefined
   let followUpPasses = 0
+  let sheetH = 0
+  let gap = 0
+  let marginV = 0
+  let metricsCache: BlockMetrics[] | null = null
+  let dirty: DirtyRange | null = { from: 0, structural: true }
 
   const applyPagination = (
     view: PMEditorView,
@@ -137,13 +195,21 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
     options.onPageCount?.(pageCount)
   }
 
+  const invalidateAll = () => {
+    metricsCache = null
+    dirty = { from: 0, structural: true }
+    sheetH = 0
+  }
+
   const recompute = (view: PMEditorView) => {
     const state = key.getState(view.state) as PaginationState | undefined
     if (!state) return
 
-    const sheetH = measureVar('--sheet-h')
-    const gap = measureVar('--sheet-gap')
-    const marginV = measureVar('--page-margin-v')
+    if (!(sheetH > 0)) {
+      sheetH = measureVar('--sheet-h')
+      gap = measureVar('--sheet-gap')
+      marginV = measureVar('--page-margin-v')
+    }
     const stride = sheetH + gap
     const capacity = sheetH - 2 * marginV
     if (!(stride > 0 && capacity > 0)) return
@@ -161,7 +227,9 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
     if (pagesEl === undefined) pagesEl = dom.closest<HTMLElement>('.pages')
 
     const blockElements = collectBlockElements(dom)
-    prepareBlockElements(blockElements)
+    const dirtyFrom = dirty?.from ?? 0
+    const structural = dirty?.structural ?? true
+    const emptyFlags = prepareBlockElements(blockElements, dirtyFrom, metricsCache)
     if (blockElements.length !== docPositions.length) {
       if (followUpPasses < MAX_PASSES) {
         followUpPasses += 1
@@ -170,14 +238,28 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
       return
     }
 
-    const metrics = measureBlocksFromDom(dom, blockElements, keepNext, state.spacers)
+    const metrics = measureNaturalBlocksIncremental(
+      blockElements,
+      keepNext,
+      emptyFlags,
+      metricsCache,
+      dirtyFrom,
+      structural,
+    )
+    metricsCache = metrics
+    syncIntrinsicSizes(blockElements, metrics, dirtyFrom)
+    dirty = null
+
     const pagesRect = pagesEl?.getBoundingClientRect()
+    const proseRect = dom.getBoundingClientRect()
     const contentStartOffset =
-      pagesRect && dom.getBoundingClientRect().top >= pagesRect.top
-        ? dom.getBoundingClientRect().top - pagesRect.top
+      pagesRect && proseRect.top >= pagesRect.top
+        ? proseRect.top - pagesRect.top
         : marginV
 
-    for (let i = 0; i < metrics.length; i += 1) {
+    // Only hit-test paragraphs that are taller than one sheet.
+    for (let i = dirtyFrom; i < metrics.length; i += 1) {
+      if (metrics[i]!.height <= capacity + EPS) continue
       if (
         pagesRect &&
         trySplitOverflowingParagraph(
@@ -192,6 +274,7 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
         )
       ) {
         followUpPasses = 0
+        dirty = { from: i, structural: true }
         schedule(view, true)
         return
       }
@@ -246,17 +329,15 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
     )
 
     applyPagination(view, spacers, decorations, pageCount)
-
-    if (followUpPasses < MAX_PASSES) {
-      followUpPasses += 1
-      schedule(view, true)
-    } else {
-      followUpPasses = 0
-    }
+    followUpPasses = 0
   }
 
   const schedule = (view: PMEditorView, soon = false) => {
-    if (timer !== null) return
+    if (timer !== null) {
+      if (!soon) return
+      clearTimeout(timer)
+      timer = null
+    }
     timer = setTimeout(() => {
       timer = null
       try {
@@ -297,20 +378,41 @@ export function createPaginationPlugin(options: PaginationOptions = {}) {
             decorations: (state) => key.getState(state)?.decorations,
           },
           view: (view) => {
-            const onResize = () => schedule(view)
+            const onResize = () => {
+              invalidateAll()
+              schedule(view)
+            }
             schedule(view)
             if (typeof document !== 'undefined' && document.fonts?.ready) {
-              document.fonts.ready.then(() => schedule(view)).catch(() => {})
+              document.fonts.ready
+                .then(() => {
+                  invalidateAll()
+                  schedule(view)
+                })
+                .catch(() => {})
             }
             window.addEventListener('resize', onResize)
             return {
-              update: (nextView) => {
-                if (!nextView.composing) schedule(nextView)
+              update: (nextView, prevState) => {
+                if (nextView.composing) return
+                if (nextView.state.doc.eq(prevState.doc)) return
+
+                const prevDoc: PMNode = prevState.doc
+                const nextDoc: PMNode = nextView.state.doc
+                const range = findChangedBlockRange(
+                  prevDoc.childCount,
+                  nextDoc.childCount,
+                  (i) => prevDoc.child(i).eq(nextDoc.child(i)),
+                )
+                dirty = mergeDirty(dirty, range)
+                followUpPasses = 0
+                schedule(nextView)
               },
               destroy: () => {
                 window.removeEventListener('resize', onResize)
                 if (timer !== null) clearTimeout(timer)
                 timer = null
+                metricsCache = null
               },
             }
           },

@@ -177,4 +177,21 @@ describe('useAutosave', () => {
     })
     expect(result.current.state).toBe('error')
   })
+
+  it('resolves a lazy getter only when the write runs', async () => {
+    const persist = vi.fn().mockResolvedValue(undefined)
+    const { result } = renderHook(() => useAutosave(persist, 900))
+    const getter = vi.fn(() => createDocument('lazy'))
+
+    act(() => result.current.schedule(getter))
+    expect(getter).not.toHaveBeenCalled()
+    expect(result.current.state).toBe('unsaved')
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(900)
+    })
+    expect(getter).toHaveBeenCalledTimes(1)
+    expect(persist).toHaveBeenCalledTimes(1)
+    expect(persist.mock.calls[0]![0].title).toBe('lazy')
+  })
 })

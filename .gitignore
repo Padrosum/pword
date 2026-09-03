@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Impeccable session/ephemeral
+.impeccable/questions/
+.impeccable/build/
+.impeccable/review/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

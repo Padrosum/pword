@@ -14,7 +14,7 @@ export function Toaster() {
         <div
           key={t.id}
           className={cn(
-            'pointer-events-auto flex max-w-md items-center gap-3 rounded-lg border px-4 py-2.5 text-sm shadow-[0_8px_24px_rgba(20,15,5,0.15)]',
+            'pointer-events-auto flex max-w-md items-center gap-3 border px-4 py-2.5 text-sm shadow-[0_8px_24px_rgba(26,26,24,0.14)]',
             t.kind === 'error'
               ? 'border-danger/30 bg-surface text-danger'
               : 'border-line bg-surface text-ink',

@@ -1,8 +1,8 @@
 import type { SaveState } from '../types/document'
 
 export const SAVE_STATE_LABEL: Record<SaveState, string> = {
-  saved: 'Saved locally',
+  saved: 'Proof saved',
   saving: 'Saving…',
-  unsaved: 'Unsaved changes',
+  unsaved: 'Unsaved marks',
   error: 'Save failed',
 }

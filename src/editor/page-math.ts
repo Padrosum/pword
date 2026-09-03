@@ -49,55 +49,192 @@ export function isEmptyBlockElement(el: HTMLElement): boolean {
   return children.every((n) => n.nodeName === 'BR')
 }
 
-/**
- * Reconstruct spacer-free block positions from heights and margins alone.
- * Reading offsetTop while spacers are in the DOM drifts after each recompute
- * and can push entire documents to the next sheet (empty first page).
- */
-export function measureNaturalBlocks(
-  elements: HTMLElement[],
-  keepNext: boolean[],
-): BlockMetrics[] {
-  const metrics: BlockMetrics[] = []
-  let cursor = 0
+/** Flow end position after a block (top + height for non-empty blocks). */
+export function blockFlowEnd(block: BlockMetrics): number {
+  return block.height > EPS ? block.top + block.height : block.top
+}
 
-  for (let i = 0; i < elements.length; i++) {
-    const el = elements[i]!
-    const empty = isEmptyBlockElement(el)
-
-    if (empty) {
-      metrics.push({
+function measureOneBlock(
+  el: HTMLElement,
+  keepNext: boolean,
+  empty: boolean,
+  prev: BlockMetrics | null,
+  cursor: number,
+): { metric: BlockMetrics; cursor: number } {
+  if (empty) {
+    return {
+      metric: {
         top: cursor,
         height: 0,
         marginTop: 0,
         marginBottom: 0,
-        keepNext: keepNext[i] ?? false,
-      })
-      continue
+        keepNext,
+      },
+      cursor,
     }
+  }
 
-    const cs = getComputedStyle(el)
-    const marginTop = Number.parseFloat(cs.marginTop) || 0
-    const marginBottom = Number.parseFloat(cs.marginBottom) || 0
-
-    if (i > 0) {
-      const prev = metrics[i - 1]!
-      if (prev.height > 0) {
-        cursor += Math.max(prev.marginBottom, marginTop)
-      }
-    }
-
-    metrics.push({
-      top: cursor,
-      height: el.offsetHeight,
+  const cs = getComputedStyle(el)
+  const marginTop = Number.parseFloat(cs.marginTop) || 0
+  const marginBottom = Number.parseFloat(cs.marginBottom) || 0
+  let top = cursor
+  if (prev && prev.height > 0) {
+    top = cursor + Math.max(prev.marginBottom, marginTop)
+  }
+  const height = el.offsetHeight
+  return {
+    metric: {
+      top,
+      height,
       marginTop,
       marginBottom,
-      keepNext: keepNext[i] ?? false,
-    })
-    cursor += el.offsetHeight
+      keepNext,
+    },
+    cursor: top + height,
+  }
+}
+
+/**
+ * Reconstruct spacer-free block positions from heights and margins alone.
+ * Reading offsetTop while spacers are in the DOM drifts after each recompute
+ * and can push entire documents to the next sheet (empty first page).
+ *
+ * Prefer this over `measureBlocksFromDom` on the typing path: it avoids
+ * per-block getBoundingClientRect and does not depend on live spacer geometry.
+ */
+export function measureNaturalBlocks(
+  elements: HTMLElement[],
+  keepNext: boolean[],
+  emptyFlags?: readonly boolean[],
+): BlockMetrics[] {
+  const metrics: BlockMetrics[] = []
+  let cursor = 0
+  let prev: BlockMetrics | null = null
+
+  for (let i = 0; i < elements.length; i++) {
+    const empty = emptyFlags?.[i] ?? isEmptyBlockElement(elements[i]!)
+    const { metric, cursor: nextCursor } = measureOneBlock(
+      elements[i]!,
+      keepNext[i] ?? false,
+      empty,
+      prev,
+      cursor,
+    )
+    metrics.push(metric)
+    cursor = nextCursor
+    prev = metric
   }
 
   return metrics
+}
+
+/**
+ * Remeasure from `fromIndex` only, keeping a cached prefix. Used so typing
+ * near the end of a long document does not touch off-screen block layout.
+ *
+ * When `structural` is false and only one block changed, subsequent tops are
+ * shifted by the flow delta instead of re-reading the DOM.
+ */
+export function measureNaturalBlocksIncremental(
+  elements: HTMLElement[],
+  keepNext: boolean[],
+  emptyFlags: readonly boolean[],
+  cache: BlockMetrics[] | null,
+  fromIndex: number,
+  structural: boolean,
+): BlockMetrics[] {
+  if (
+    !cache ||
+    fromIndex <= 0 ||
+    fromIndex > cache.length ||
+    fromIndex > elements.length
+  ) {
+    return measureNaturalBlocks(elements, keepNext, emptyFlags)
+  }
+
+  const prefix = cache.slice(0, fromIndex)
+  const prev = prefix[fromIndex - 1] ?? null
+  const cursor = prev ? blockFlowEnd(prev) : 0
+
+  // Single-block content edit: remeasure that block, shift the rest.
+  if (
+    !structural &&
+    cache.length === elements.length &&
+    fromIndex < cache.length
+  ) {
+    const { metric } = measureOneBlock(
+      elements[fromIndex]!,
+      keepNext[fromIndex] ?? false,
+      emptyFlags[fromIndex] ?? isEmptyBlockElement(elements[fromIndex]!),
+      prev,
+      cursor,
+    )
+    const old = cache[fromIndex]!
+    const delta = blockFlowEnd(metric) - blockFlowEnd(old)
+    const metrics = prefix.concat(metric)
+    for (let i = fromIndex + 1; i < cache.length; i += 1) {
+      const block = cache[i]!
+      metrics.push(
+        Math.abs(delta) < EPS
+          ? block
+          : { ...block, top: block.top + delta },
+      )
+    }
+    return metrics
+  }
+
+  // Structural insert/delete (or dirty range at end): remeasure from index.
+  const suffix = measureNaturalBlocks(
+    elements.slice(fromIndex),
+    keepNext.slice(fromIndex),
+    emptyFlags.slice(fromIndex),
+  )
+  if (!prev || suffix.length === 0) return prefix.concat(suffix)
+
+  // measureNaturalBlocks starts suffix tops at 0; place them after the prefix.
+  const placed: BlockMetrics[] = []
+  let flow = cursor
+  let last: BlockMetrics | null = prev
+  for (const raw of suffix) {
+    if (raw.height <= EPS) {
+      const metric = { ...raw, top: flow }
+      placed.push(metric)
+      last = metric
+      continue
+    }
+    let top = flow
+    if (last && last.height > 0) {
+      top = flow + Math.max(last.marginBottom, raw.marginTop)
+    }
+    const metric = { ...raw, top }
+    placed.push(metric)
+    flow = top + raw.height
+    last = metric
+  }
+  return prefix.concat(placed)
+}
+
+/**
+ * First top-level block index that differs between two docs.
+ * Returns structural:true when child count changes (insert/delete/split).
+ */
+export function findChangedBlockRange(
+  prevChildCount: number,
+  nextChildCount: number,
+  sameChildAt: (index: number) => boolean,
+): { from: number; structural: boolean } {
+  const shared = Math.min(prevChildCount, nextChildCount)
+  let from = shared
+  for (let i = 0; i < shared; i += 1) {
+    if (!sameChildAt(i)) {
+      from = i
+      break
+    }
+  }
+  return {
+    from,
+    structural: prevChildCount !== nextChildCount,
+  }
 }
 
 /**

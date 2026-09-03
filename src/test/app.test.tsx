@@ -12,7 +12,8 @@ describe('App', () => {
   it('shows the home view with a start-writing action', async () => {
     render(<App />)
     expect(await screen.findByRole('button', { name: /start writing/i })).toBeInTheDocument()
-    expect(screen.getByText(/private by design/i)).toBeInTheDocument()
+    expect(screen.getByText(/proof desk/i)).toBeInTheDocument()
+    expect(screen.getByText(/write privately/i)).toBeInTheDocument()
   })
 
   it('creates a document, shows the editor, and survives returning home', async () => {
@@ -26,7 +27,7 @@ describe('App', () => {
       expect(screen.getByRole('toolbar', { name: /formatting/i })).toBeInTheDocument()
     })
     expect(screen.getByLabelText('Document title')).toHaveValue('Untitled document')
-    expect(screen.getByText('Stored locally')).toBeInTheDocument()
+    expect(screen.getByText('Local')).toBeInTheDocument()
 
     // Return home — the document should be listed.
     await user.click(screen.getByRole('button', { name: /back to documents/i }))

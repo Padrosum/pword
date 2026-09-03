@@ -25,7 +25,7 @@ export function ThemeToggle() {
           aria-expanded={open}
           aria-label={`Theme: ${current.label}`}
           title={`Theme: ${current.label}`}
-          className="inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-accent-soft hover:text-ink"
+          className="inline-flex size-8 items-center justify-center text-muted transition-colors hover:bg-accent-soft hover:text-ink"
         >
           <current.icon className="size-4" />
         </button>

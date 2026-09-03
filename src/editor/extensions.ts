@@ -52,6 +52,8 @@ function collect() {
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },
       codeBlock: { HTMLAttributes: { spellcheck: false } },
+      // Long documents accumulate huge undo stacks; cap memory growth.
+      history: { depth: 100, newGroupDelay: 500 },
     }),
     Underline,
     TextStyle,

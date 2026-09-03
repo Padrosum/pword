@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
+import type { Editor } from '@tiptap/core'
 import {
   Copy,
   FileDown,
@@ -19,6 +20,7 @@ import { useAutosave } from '../hooks/useAutosave'
 import { clearPendingSave, consumePendingSave } from '../lib/lifecyclePersist'
 import { countCharacters, countWords } from '../lib/textStats'
 import { downloadBlob, sanitizeFilename } from '../lib/download'
+import { throttle } from '../lib/debounce'
 import { toast } from '../lib/toast'
 import {
   jsonToPlainText,
@@ -30,7 +32,14 @@ import { exportDocx } from '../export/docx'
 import { printDocument } from '../export/print'
 import { importDocx } from '../import/docx'
 import type { DocumentRepository } from '../storage/documents'
-import type { PadDocument } from '../types/document'
+import type { DocumentContent, PadDocument } from '../types/document'
+
+/** Spellcheck across tens of thousands of words stalls typing; disable above this doc size. */
+const SPELLCHECK_SIZE_LIMIT = 40_000
+
+function plainTextFromEditor(editor: Editor): string {
+  return editor.state.doc.textBetween(0, editor.state.doc.content.size, '\n')
+}
 
 interface EditorViewProps {
   doc: PadDocument
@@ -52,6 +61,8 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
   const revisionRef = useRef(doc.revision ?? 0)
   const conflictNotifiedRef = useRef(false)
   const recoveredRef = useRef(false)
+  const editorRef = useRef<Editor | null>(null)
+  const editedAtRef = useRef(doc.updatedAt)
 
   useEffect(() => {
     conflictNotifiedRef.current = false
@@ -108,29 +119,76 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
     [onPageCount],
   )
 
+  const publishStats = useMemo(
+    () =>
+      throttle((editor: Editor) => {
+        const text = plainTextFromEditor(editor)
+        const words = countWords(text)
+        const chars = countCharacters(text)
+        latestDocRef.current = {
+          ...latestDocRef.current,
+          wordCount: words,
+          charCount: chars,
+        }
+        setStats((prev) =>
+          prev.words === words && prev.chars === chars
+            ? prev
+            : { ...prev, words, chars },
+        )
+      }, 200),
+    [],
+  )
+
+  const snapshotFromEditor = useCallback((): PadDocument => {
+    const current = editorRef.current
+    const content = (current?.getJSON() ?? latestDocRef.current.content) as DocumentContent
+    const text = current ? plainTextFromEditor(current) : jsonToPlainText(content)
+    const updated: PadDocument = {
+      ...latestDocRef.current,
+      title: titleRef.current,
+      content,
+      wordCount: countWords(text),
+      charCount: countCharacters(text),
+      updatedAt: editedAtRef.current,
+    }
+    latestDocRef.current = updated
+    return updated
+  }, [])
+
   const editor = useEditor({
     extensions,
     content: doc.content,
+    shouldRerenderOnTransaction: false,
     editorProps: {
       attributes: {
         'aria-label': 'Document content',
         spellcheck: 'true',
       },
     },
+    onCreate: ({ editor: current }) => {
+      editorRef.current = current
+    },
+    onDestroy: () => {
+      editorRef.current = null
+    },
     onUpdate: ({ editor: current }) => {
-      const content = current.getJSON()
-      const text = jsonToPlainText(content)
-      const updated: PadDocument = {
+      editorRef.current = current
+      editedAtRef.current = Date.now()
+      latestDocRef.current = {
         ...latestDocRef.current,
         title: titleRef.current,
-        content,
-        wordCount: countWords(text),
-        charCount: countCharacters(text),
-        updatedAt: Date.now(),
+        updatedAt: editedAtRef.current,
       }
-      latestDocRef.current = updated
-      setStats((prev) => ({ ...prev, words: updated.wordCount, chars: updated.charCount }))
-      schedule(updated)
+      publishStats(current)
+
+      const dom = current.view.dom
+      const spellcheck = current.state.doc.content.size < SPELLCHECK_SIZE_LIMIT ? 'true' : 'false'
+      if (dom.getAttribute('spellcheck') !== spellcheck) {
+        dom.setAttribute('spellcheck', spellcheck)
+      }
+
+      // Serialize JSON only when the autosave debounce fires (or on flush).
+      schedule(snapshotFromEditor)
     },
   })
 
@@ -256,7 +314,17 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
   }
 
   return (
-    <div className="flex h-dvh flex-col">
+    <div
+      className="flex h-dvh flex-col"
+      onFocusCapture={() => {
+        document.documentElement.style.setProperty('--chrome-dim', '0.72')
+      }}
+      onBlurCapture={(event) => {
+        const next = event.relatedTarget as Node | null
+        if (next && event.currentTarget.contains(next)) return
+        document.documentElement.style.setProperty('--chrome-dim', '1')
+      }}
+    >
       <TopBar
         title={title}
         onTitleChange={handleTitleChange}
@@ -321,7 +389,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
           <button
             type="button"
             onClick={() => setDeleteDialogOpen(false)}
-            className="h-9 rounded-lg border border-line px-4 text-sm font-medium text-ink hover:bg-accent-soft"
+            className="h-9 border border-line px-4 text-sm font-medium text-ink hover:bg-accent-soft"
           >
             Cancel
           </button>
@@ -331,7 +399,7 @@ export function EditorView({ doc, repository, onBack, onOpenDoc, onCreateDocumen
               setDeleteDialogOpen(false)
               void remove()
             }}
-            className="h-9 rounded-lg bg-danger px-4 text-sm font-medium text-white hover:opacity-90 dark:text-black"
+            className="h-9 bg-danger px-4 text-sm font-medium text-white hover:opacity-90 dark:text-black"
           >
             Delete
           </button>

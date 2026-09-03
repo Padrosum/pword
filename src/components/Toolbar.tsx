@@ -136,8 +136,8 @@ export function Toolbar({ editor }: { editor: Editor }) {
   const chain = () => editor.chain().focus()
 
   return (
-    <div className="no-print border-b border-line bg-surface" role="toolbar" aria-label="Formatting">
-      <div className="no-scrollbar mx-auto flex max-w-6xl items-center gap-0.5 overflow-x-auto px-2 py-1.5 sm:px-4">
+    <div className="galley-rail no-print border-b border-line bg-surface" role="toolbar" aria-label="Formatting">
+      <div className="no-scrollbar mx-auto flex max-w-6xl items-center gap-0.5 overflow-x-auto px-2 py-1 sm:px-4">
         <IconButton label="Undo" onClick={() => chain().undo().run()} disabled={!s.canUndo}>
           <Undo2 className="size-4" />
         </IconButton>
@@ -397,21 +397,21 @@ function LinkDialogInner({ editor, initialHref, onClose }: { editor: Editor; ini
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://example.com"
           aria-label="Link URL"
-          className="h-9 w-full rounded-lg border border-line bg-canvas px-3 text-sm text-ink outline-none focus:border-accent"
+          className="h-9 w-full border border-line bg-canvas px-3 text-sm text-ink outline-none focus:border-accent"
         />
         <div className="flex justify-end gap-2">
           {editor.isActive('link') && (
             <button
               type="button"
               onClick={() => { editor.chain().focus().extendMarkRange('link').unsetLink().run(); onClose() }}
-              className="h-9 rounded-lg px-3 text-sm text-danger hover:bg-accent-soft"
+              className="h-9 px-3 text-sm text-danger hover:bg-accent-soft"
             >
               Remove link
             </button>
           )}
           <button
             type="submit"
-            className="h-9 rounded-lg bg-accent px-4 text-sm font-medium text-accent-contrast hover:opacity-90"
+            className="h-9 bg-accent px-4 text-sm font-medium text-accent-contrast hover:opacity-90"
           >
             Apply
           </button>

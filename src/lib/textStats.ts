@@ -6,5 +6,8 @@ export function countWords(text: string): number {
 
 export function countCharacters(text: string): number {
   // Count what the writer perceives as characters: code points, not UTF-16 units.
-  return [...text].length
+  // Iterate instead of spreading into an array — long documents allocate far less.
+  let count = 0
+  for (const _ of text) count += 1
+  return count
 }

@@ -17,13 +17,13 @@ interface TopBarProps {
 
 export function TopBar({ title, onTitleChange, saveState, onBack, menu }: TopBarProps) {
   return (
-    <header className="no-print border-b border-line bg-surface">
-      <div className="mx-auto flex h-12 max-w-6xl items-center gap-2 px-2 sm:px-4">
+    <header className="galley-rail no-print border-b border-line bg-surface">
+      <div className="mx-auto flex h-11 max-w-6xl items-center gap-1.5 px-2 sm:px-4">
         <IconButton label="Back to documents" onClick={onBack}>
           <ArrowLeft className="size-4" />
         </IconButton>
         <div className="hidden items-center gap-2 sm:flex">
-          <BrandMark />
+          <BrandMark className="size-5" />
           <span className="text-sm font-semibold tracking-tight text-ink">Pword</span>
         </div>
 
@@ -34,13 +34,13 @@ export function TopBar({ title, onTitleChange, saveState, onBack, menu }: TopBar
             onChange={(event) => onTitleChange(event.target.value)}
             aria-label="Document title"
             placeholder="Untitled document"
-            className="h-8 w-full max-w-sm rounded-md border border-transparent bg-transparent px-2 text-center text-sm font-medium text-ink outline-none transition-colors hover:border-line focus:border-line focus:bg-canvas"
+            className="h-8 w-full max-w-sm border border-transparent bg-transparent px-2 text-center text-sm font-medium text-ink outline-none transition-colors hover:border-line focus:border-line focus:bg-canvas"
           />
         </div>
 
         <span
           className={cn(
-            'text-xs',
+            'font-mono text-[11px] uppercase tracking-[0.08em]',
             saveState === 'error' ? 'inline text-danger' : 'hidden text-muted sm:inline',
           )}
           role="status"
